@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Duck Wars</title>
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+#form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+#input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+#input:focus { outline: none; }
+#form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+#messages { list-style-type: none; margin: 0; padding: 0; }
+#messages > li { padding: 0.5rem 1rem; }
+#messages > li:nth-child(odd) { background: #efefef; }
+canvas {
+  border:1px solid #d3d3d3;
+  background-color: #f1f1f1;
+}
+#canvasHolder{
+  text-align:center
+}
+.titleText{
+  text-align: center;
+    font-family: Impact, Charcoal, sans-serif;
+font-size: 36px;
+letter-spacing: -1.2px;
+word-spacing: -2.8px;
+color: #FF872E;
+font-weight: 400;
+text-decoration: none;
+font-style: normal;
+font-variant: normal;
+text-transform: none;
+}
+.joinForm{
+  text-align: center;
+}
+.gameInstructions{
+  text-align: center;
+}
+.startBtn{
+  text-align: center;
+}
+.stbtn{
+  width:800px;
+  height:50px;
+}
+#playerLobby{
+  text-align: center;
+}
+#playerList{
+  text-align: center;
+  color:red;
+  background-color:rgb(200, 207, 158);
+  border: 1px solid black;
+}
+#playerCount{
+  color:black;
+}
+    </style>
+  </head>
+
+
+<body >
+<h1 class = "titleText">Duck Wars</h1>   
+<div id = "canvasHolder"></div>         
+<p class = "joinForm">
+<label for = "playerName">Enter Name :</label>
+<input type = "text" name = "playerName" id = "playerName" placeholder = "Enter username...">
+<button onclick = "joinGame()" class = "btn-primary">Join Game</button>
+</p>
+<br>
+<div class = "startBtn">
+<button class = "stbtn btn-primary" onclick = "startGame()">Start Game</button>        
+</div>
+    
+    <div id ="playerLobby"><h3>Players In Game</h3>
+    <p id = "playerCount"></p>
+    <div id = "playerList"></div>
+  </div>
+    
+    <p class = "gameInstructions">Make sure the gamearea has focus, and use the arrow keys to move, spacebar to shoot. Note: all players must be in lobby before starting</p>
+    
+    
+    <!-- <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+    </form> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+    var myGamePiece;
+   // var myGamePiece2;
+   // playerId is self position in playerList 
+    var playerId;
+   // playerCap is the quantity of players allowed in playerList
+    var playerCap = 3;
+    // playerList holds the list of player objects shown in the canvas
+    var playerList = [];
+    // length of playerList
+    var playerCount;
+    // width of canvas
+    // var canvasWidth = window.innerWidth * 0.9;
+    var canvasWidth = 800;
+    //height of canvas
+    // var canvasHeight = window.innerHeight * 0.9;
+    var canvasHeight = 500;
+    // different colors player could be, instead here we should replace with ducks
+    var colors = ["blue","red","green","orange","black","navy"]
+    
+    // var dankyImage = new Image();
+    // dankyImage.src ="img/Danky_idle1.png";
+    function findPlayerInList(id){
+     for (x in playerList){
+       if (playerList[x].id == String(id) ){
+         console.log(playerList[x].id)
+         return Number(x);
+       }
+     }
+     return null
+    }
+    function joinGame(){
+      if (playerId == null)
+      {
+        // these just be run in the server app.js to prevent hackers from editing on their client and sending to the server...
+        // playerPositionY = Math.floor((Math.random() * 225) + 1);
+        // playerPositionX = Math.floor((Math.random() * 225) + 1);
+        // playerColor = colors[Math.floor(Math.random()* colors.length)];
+
+        socket.emit('playerJoined',{playerName:document.getElementById("playerName").value,id:socket.id});
+      }
+    }
+    function createLobby(){
+      myGameArea.create();
+    }
+    function startGame() {
+        socket.emit('startGame');
+    }
+    
+    var myGameArea = {
+        canvas : document.createElement("canvas"),
+        create : function() {
+            this.canvas.width = canvasWidth;
+            this.canvas.height = canvasHeight;
+            this.context = this.canvas.getContext("2d");
+            let game = document.getElementById("canvasHolder");
+            // change the use of innerhtml possibly in the future.
+            game.appendChild(this.canvas)
+            //document.body.insertBefore(this.canvas, document.body.childNodes[3]);
+        },
+        start : function() {
+            this.frameNo = 0;
+            this.interval = setInterval(updateGameArea, 20);
+            window.addEventListener('keydown', function (e) {
+                e.preventDefault();
+                myGameArea.keys = (myGameArea.keys || []);
+                myGameArea.keys[e.keyCode] = (e.type == "keydown");
+            })
+            window.addEventListener('keyup', function (e) {
+                myGameArea.keys[e.keyCode] = (e.type == "keydown");
+            })
+        },
+        stop : function() {
+            clearInterval(this.interval);
+        },    
+        clear : function() {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
+    function Healthbar(ownerId,startHealth){
+      this.ownerId = ownerId
+      this.health = startHealth
+      this.width = 100;
+      this.height = 40;
+      this.update = function (){
+        ctx = myGameArea.context;
+        ctx.save();
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height)
+        ctx.restore(); 
+      }
+    }
+
+    function Player(width, height, color, x, y, name,id) {
+        this.healthBar = new Healthbar(playerList.length,100)
+        this.playerName = name;
+        this.id = id;
+       // this.type = type;
+        this.width = width;
+        this.height = height;
+        this.speed = 0;
+        this.angle = 0;
+        this.moveAngle = 0;
+        this.x = x;
+        this.y = y;    
+        this.update = function() {
+            ctx = myGameArea.context;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            ctx.fillStyle = color;
+            ctx.fillText(name,-15,-20);
+            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+           // ctx.drawImage(dankyImage,0,0)
+            ctx.restore();    
+        }
+        this.newPos = function() {
+            this.angle += this.moveAngle * Math.PI / 180;
+            this.x += this.speed * Math.sin(this.angle);
+            this.y -= this.speed * Math.cos(this.angle);
+        }
+    }
+    
+    function updateGameArea() {
+         myGameArea.clear();
+         myGamePiece = playerList[findPlayerInList(socket.id)];
+         myGamePiece.moveAngle = 0;
+         myGamePiece.speed = 0;
+         if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -1; }
+         if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 1; }
+         if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed= 1; }
+         if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed= -1; }
+         myGamePiece.newPos();
+        //myGamePiece.update();
+        socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,angle:myGamePiece.angle});
+        
+        for (i = 0; i < playerList.length; i += 1) {
+
+       // playerList[i].newPos();
+        playerList[i].update();
+    }
+    }
+        socket.on('updatePlayers', function(newPlayerList) {
+          let tmpList = []
+          playersInLobby = "";
+          for (x in newPlayerList){
+            player = newPlayerList[x];
+            tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"]);
+            tmpList.push(tmpPlayer);
+            playersInLobby += player["name"] + ","
+          }
+          playerList = tmpList;
+          document.getElementById("playerList").innerText = playersInLobby;
+          document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
+          console.log(playerList);
+          console.log(socket.id)
+        });
+        socket.on("playerMovement",function(playerMovment){
+            let id = playerMovment["id"];
+            let x = playerMovment["x"];
+            let y = playerMovment["y"];
+            let angle = playerMovment["angle"];
+            
+            playerList[findPlayerInList(id)].x = x;
+            playerList[findPlayerInList(id)].y = y;
+            playerList[findPlayerInList(id)].angle = angle;
+        });
+        socket.on("startGame",function(lobby){
+          console.log("received start game call from server.")
+          myGameArea.start();
+        })
+        createLobby()
+      </script>
+</body>
+
+</html>
