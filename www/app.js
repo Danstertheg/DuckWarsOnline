@@ -9,8 +9,10 @@ var playerList = [];
 var playerCount = 0;
 const roomSize = 3;
 var colors = ["blue","red","green","orange","black","navy"]
+var skins = ["oats","danky","mr.goose"];
+app.use(express.static(__dirname));
 app.get('/', (req, res) => {
-  console.log(__dirname)
+  console.log("__dirname is : "+__dirname)
   res.sendFile(__dirname + '/index.html');
 });
 
@@ -20,31 +22,36 @@ io.on('connection', (socket) => {
     });
 
     socket.on('playerJoined', (playerInitObj) => {
-        let playerId = socket.id;
-        let playerPositionY = Math.floor((Math.random() * 225) + 1);
-        let playerPositionX = Math.floor((Math.random() * 225) + 1);
-        let playerColor = colors[Math.floor(Math.random()* colors.length)];
-        let newplayer = {
-          id:playerId,
-          x:playerPositionX,
-          y:playerPositionY,
-          color:playerColor,
-          name:playerInitObj["playerName"]
-        };
         // if the player limit is not exceeded, let the player join
         if (playerCount < roomSize){
-        playerList.push(newplayer);
-        playerCount++;
-        console.log(playerList);
-        console.log("Current Player Count: " + String(playerCount))
-        io.emit('updatePlayers', playerList);
+          let playerSkin = skins[playerCount]
+          let playerId = socket.id;
+          let playerPositionY = Math.floor((Math.random() * 225) + 1);
+          let playerPositionX = Math.floor((Math.random() * 225) + 1);
+          let playerColor = colors[Math.floor(Math.random()* colors.length)];
+          //JSON Object
+          let newplayer = {
+            id:playerId,
+            x:playerPositionX,
+            y:playerPositionY,
+            color:playerColor,
+            name:playerInitObj["playerName"],
+            skin:playerSkin
+          };
+          // [{},{},{}]
+          playerList.push(newplayer);
+          // count 
+          playerCount++;
+          console.log(playerList);
+          console.log("Current Player Count: " + String(playerCount))
+          io.emit('updatePlayers', playerList);
         }
         else{ // playercount is exceeded... dont allow to join 
-        console.log("room size full")
+        console.log("room size full. Sorry mate")
         }
       });
       socket.on('playerMovement',(playerMov) => {
-        io.emit('playerMovement', playerMov);
+        socket.broadcast.emit('playerMovement', playerMov);
       })
 
       socket.on('startGame',(lobby) => {
@@ -65,6 +72,6 @@ io.on('connection', (socket) => {
       })
   });
 
-server.listen(8000, '10.0.0.100',() => {
+server.listen(8000,() => {
   console.log('listening on *:8000');
 });

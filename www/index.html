@@ -64,8 +64,12 @@ text-transform: none;
   </head>
 
 
-<body >
-<h1 class = "titleText">Duck Wars</h1>   
+<body>
+<h1 class = "titleText">Duck Wars</h1>
+<p style = "text-align: center;">
+  <img src="img/Danky_idle1.png"><img src="img/Oats_idle1.png">
+</p>
+
 <div id = "canvasHolder"></div>         
 <p class = "joinForm">
 <label for = "playerName">Enter Name :</label>
@@ -91,8 +95,9 @@ text-transform: none;
     </form> -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var socket = io();
 
+
+    var socket = io();
     var myGamePiece;
    // var myGamePiece2;
    // playerId is self position in playerList 
@@ -111,13 +116,19 @@ text-transform: none;
     var canvasHeight = 500;
     // different colors player could be, instead here we should replace with ducks
     var colors = ["blue","red","green","orange","black","navy"]
-    
+    const background = new Image();
+        background.src = 'img/lake.png';
+        function handleBackground() {
+          ctx = myGameArea.context;
+          ctx.drawImage(background, 0, 0, canvasWidth, canvasHeight);
+        }
+
     // var dankyImage = new Image();
     // dankyImage.src ="img/Danky_idle1.png";
     function findPlayerInList(id){
      for (x in playerList){
        if (playerList[x].id == String(id) ){
-         console.log(playerList[x].id)
+         //console.log(playerList[x].id)
          return Number(x);
        }
      }
@@ -184,8 +195,22 @@ text-transform: none;
         ctx.restore(); 
       }
     }
-
-    function Player(width, height, color, x, y, name,id) {
+    const Danky = new Image();
+    Danky.src = 'img/Danky_idle1.png';
+    const Oats = new Image();
+    Oats.src = 'img/Oats_idle1.png';
+    const Mr = new Image();
+    Mr.src = 'img/mrgoose.png';
+    function Player(width, height, color, x, y, name,id,skin) {
+      if (skin == "danky"){
+        this.skin = Danky;
+      }
+      else if(skin == "oats"){
+        this.skin = Oats
+      }
+      else{
+        this.skin = Mr;
+      }
         this.healthBar = new Healthbar(playerList.length,100)
         this.playerName = name;
         this.id = id;
@@ -201,53 +226,58 @@ text-transform: none;
             ctx = myGameArea.context;
             ctx.save();
             ctx.translate(this.x, this.y);
-            ctx.rotate(this.angle);
+            //ctx.rotate(this.angle);
             ctx.fillStyle = color;
             ctx.fillText(name,-15,-20);
-            ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-           // ctx.drawImage(dankyImage,0,0)
+            //ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+            ctx.drawImage(this.skin,0,0)
             ctx.restore();    
         }
         this.newPos = function() {
             this.angle += this.moveAngle * Math.PI / 180;
-            this.x += this.speed * Math.sin(this.angle);
-            this.y -= this.speed * Math.cos(this.angle);
+            //this.x += this.speed * Math.sin(this.angle);
+            //this.y -= this.speed * Math.cos(this.angle);
+            this.x += this.Xspeed;
+            this.y -= this.Yspeed;
+            console.log(this.x, this.y);
         }
     }
     
     function updateGameArea() {
          myGameArea.clear();
+         handleBackground();
          myGamePiece = playerList[findPlayerInList(socket.id)];
-         myGamePiece.moveAngle = 0;
-         myGamePiece.speed = 0;
-         if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -1; }
-         if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 1; }
-         if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed= 1; }
-         if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed= -1; }
+         for (i = 0; i < playerList.length; i += 1) {
+
+          // playerList[i].newPos();
+          playerList[i].update();
+          }
+         myGamePiece.Xspeed = 0;
+         myGamePiece.Yspeed = 0;
+         if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.Xspeed = -1; }
+         if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.Xspeed = 1; }
+         if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.Yspeed = 1; }
+         if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.Yspeed= -1; }
          myGamePiece.newPos();
         //myGamePiece.update();
         socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,angle:myGamePiece.angle});
         
-        for (i = 0; i < playerList.length; i += 1) {
 
-       // playerList[i].newPos();
-        playerList[i].update();
-    }
     }
         socket.on('updatePlayers', function(newPlayerList) {
           let tmpList = []
           playersInLobby = "";
           for (x in newPlayerList){
             player = newPlayerList[x];
-            tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"]);
+            tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"],player["skin"]);
             tmpList.push(tmpPlayer);
             playersInLobby += player["name"] + ","
           }
           playerList = tmpList;
           document.getElementById("playerList").innerText = playersInLobby;
           document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
-          console.log(playerList);
-          console.log(socket.id)
+          //console.log(playerList);
+         // console.log(socket.id)
         });
         socket.on("playerMovement",function(playerMovment){
             let id = playerMovment["id"];
@@ -260,7 +290,7 @@ text-transform: none;
             playerList[findPlayerInList(id)].angle = angle;
         });
         socket.on("startGame",function(lobby){
-          console.log("received start game call from server.")
+          //console.log("received start game call from server.")
           myGameArea.start();
         })
         createLobby()
