@@ -12,7 +12,11 @@ canvas {
   border:1px solid #d3d3d3;
   background-color: #f1f1f1;
 }
+#canvasHolder{
+  text-align:center
+}
 .titleText{
+  text-align: center;
     font-family: Impact, Charcoal, sans-serif;
 font-size: 36px;
 letter-spacing: -1.2px;
@@ -23,4 +27,29 @@ text-decoration: none;
 font-style: normal;
 font-variant: normal;
 text-transform: none;
+}
+.joinForm{
+  text-align: center;
+}
+.gameInstructions{
+  text-align: center;
+}
+.startBtn{
+  text-align: center;
+}
+.stbtn{
+  width:800px;
+  height:50px;
+}
+#playerLobby{
+  text-align: center;
+}
+#playerList{
+  text-align: center;
+  color:red;
+  background-color:rgb(200, 207, 158);
+  border: 1px solid black;
+}
+#playerCount{
+  color:black;
 }

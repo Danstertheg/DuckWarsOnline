@@ -2,104 +2,43 @@
 <html>
   <head>
     <title>Duck Wars</title>
-    <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <style>
-      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-
-#form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-#input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-#input:focus { outline: none; }
-#form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
-
-#messages { list-style-type: none; margin: 0; padding: 0; }
-#messages > li { padding: 0.5rem 1rem; }
-#messages > li:nth-child(odd) { background: #efefef; }
-canvas {
-  border:1px solid #d3d3d3;
-  background-color: #f1f1f1;
-}
-#canvasHolder{
-  text-align:center
-}
-.titleText{
-  text-align: center;
-    font-family: Impact, Charcoal, sans-serif;
-font-size: 36px;
-letter-spacing: -1.2px;
-word-spacing: -2.8px;
-color: #FF872E;
-font-weight: 400;
-text-decoration: none;
-font-style: normal;
-font-variant: normal;
-text-transform: none;
-}
-.joinForm{
-  text-align: center;
-}
-.gameInstructions{
-  text-align: center;
-}
-.startBtn{
-  text-align: center;
-}
-.stbtn{
-  width:800px;
-  height:50px;
-}
-#playerLobby{
-  text-align: center;
-}
-#playerList{
-  text-align: center;
-  color:red;
-  background-color:rgb(200, 207, 158);
-  border: 1px solid black;
-}
-#playerCount{
-  color:black;
-}
-    </style>
+<link rel="stylesheet" href="css/index.css">
   </head>
-
-
-<body>
-<h1 class = "titleText">Duck Wars</h1>
+<body style = "background-color: darkcyan;">
+<!-- <h1 class = "titleText">Duck Wars</h1> -->
 <p style = "text-align: center;">
-  <img src="img/Danky_idle1.png"><img src="img/Oats_idle1.png">
+  <img src="img/logo.png" style = "width:80px;height:50px;">
 </p>
 
-<div id = "canvasHolder"></div>         
+<div id = "canvasHolder"></div>
+<p style = "text-align: center;">
+  <input id = "message" type="text" style = "width:800px;" placeholder = "send a message here... (Not yet supported)...">
+  <button onclick = "sendMessage()" class = "btn-primary" style = "width:200px;">Send</button>
+</p>         
+<h3 style = "text-align: center;">Enter Name to Join Game</h3>
 <p class = "joinForm">
-<label for = "playerName">Enter Name :</label>
-<input type = "text" name = "playerName" id = "playerName" placeholder = "Enter username...">
-<button onclick = "joinGame()" class = "btn-primary">Join Game</button>
+  <label for = "playerName">Enter Name :</label>
+  <input type = "text" name = "playerName" id = "playerName" placeholder = "Enter username...">
+  <button onclick = "joinGame()" class = "btn-primary">Join Game</button>
 </p>
-<br>
+  <br>
 <div class = "startBtn">
-<button class = "stbtn btn-primary" onclick = "startGame()">Start Game</button>        
+  <button class = "stbtn btn-primary" onclick = "startGame()">Start Match (Starts game for all in lobby), join first</button>        
 </div>
-    
-    <div id ="playerLobby"><h3>Players In Game</h3>
-    <p id = "playerCount"></p>
-    <div id = "playerList"></div>
-  </div>
-    
+    <div id ="playerLobby">
+      <h3>Players In Game</h3>
+      <p id = "playerCount"></p>
+      <div id = "playerList"></div>
+    </div>
     <p class = "gameInstructions">Make sure the gamearea has focus, and use the arrow keys to move, spacebar to shoot. Note: all players must be in lobby before starting</p>
-    
-    
-    <!-- <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form> -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-
-
     var socket = io();
+
+    var shootCharge = 0;
+
     var myGamePiece;
-   // var myGamePiece2;
    // playerId is self position in playerList 
     var playerId;
    // playerCap is the quantity of players allowed in playerList
@@ -108,27 +47,30 @@ text-transform: none;
     var playerList = [];
     // length of playerList
     var playerCount;
+    // list of all projectiles on the scene for client to keep track of (this gets updated by the server.)
+    var projectiles = [];
     // width of canvas
     // var canvasWidth = window.innerWidth * 0.9;
-    var canvasWidth = 800;
+    var canvasWidth = 1000;
     //height of canvas
     // var canvasHeight = window.innerHeight * 0.9;
-    var canvasHeight = 500;
+    var canvasHeight = 600;
     // different colors player could be, instead here we should replace with ducks
-    var colors = ["blue","red","green","orange","black","navy"]
+    //var colors = ["blue","red","green","orange","black","navy"]
+    function sendMessage(){
+      console.log("hi");
+      let message = document.getElementById("message").value;
+      socket.emit('message',{msg:message,id:socket.id})
+    }
     const background = new Image();
         background.src = 'img/lake.png';
         function handleBackground() {
           ctx = myGameArea.context;
           ctx.drawImage(background, 0, 0, canvasWidth, canvasHeight);
         }
-
-    // var dankyImage = new Image();
-    // dankyImage.src ="img/Danky_idle1.png";
     function findPlayerInList(id){
      for (x in playerList){
        if (playerList[x].id == String(id) ){
-         //console.log(playerList[x].id)
          return Number(x);
        }
      }
@@ -137,11 +79,6 @@ text-transform: none;
     function joinGame(){
       if (playerId == null)
       {
-        // these just be run in the server app.js to prevent hackers from editing on their client and sending to the server...
-        // playerPositionY = Math.floor((Math.random() * 225) + 1);
-        // playerPositionX = Math.floor((Math.random() * 225) + 1);
-        // playerColor = colors[Math.floor(Math.random()* colors.length)];
-
         socket.emit('playerJoined',{playerName:document.getElementById("playerName").value,id:socket.id});
       }
     }
@@ -182,87 +119,201 @@ text-transform: none;
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
-    function Healthbar(ownerId,startHealth){
-      this.ownerId = ownerId
-      this.health = startHealth
-      this.width = 100;
-      this.height = 40;
-      this.update = function (){
-        ctx = myGameArea.context;
-        ctx.save();
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height)
-        ctx.restore(); 
-      }
+ // Projectile=======================================================
+    const breadShotImage = new Image();
+    breadShotImage.src = 'img/breadProjectile.png';
+    class BreadProjectile {
+        constructor(shooter) {
+            //this.target = opponent; // ? THIS WAY? or maybe only target is needed since it will never collide with player. 
+            this.shooter = playerList[findPlayerInList(shooter)]
+            this.x = (this.shooter.direction == 'r') ? this.shooter.x + 25 : this.shooter.x - 25;
+            this.y = this.shooter.y;
+            this.radius = 10;
+            this.speed = 20;
+            this.direction = this.shooter.direction; // set in constructor and then never changed 
+            this.distance; // distance between it and opponent
+            this.damage = 10;
+            this.damageCounted = false;
+        }
+        update() {
+            if (this.direction == 'l')
+                this.x -= this.speed;
+            else
+                this.x += this.speed;
+
+            // calculate distance between it and opponent
+           // const dx = this.x - this.target.x;
+           // const dy = this.y - this.target.y;
+            //this.distance = Math.sqrt(dx*dx + dy*dy); //pythegorean theorem!
+        }
+        draw() {
+            ctx = myGameArea.context;
+
+            ctx.drawImage(breadShotImage, this.x + 11, this.y + 11, this.radius * 2.5, this.radius * 2.5);
+        }
+        
     }
-    const Danky = new Image();
-    Danky.src = 'img/Danky_idle1.png';
-    const Oats = new Image();
-    Oats.src = 'img/Oats_idle1.png';
-    const Mr = new Image();
-    Mr.src = 'img/mrgoose.png';
+    function HandleProjectiles() {
+      for (j in playerList){
+        for (i in projectiles){
+          projectiles[i].update();
+          projectiles[i].draw();
+          let dx = projectiles[i].x - playerList[j].x;
+          let dy = projectiles[i].y - playerList[j].y;
+          let distance = Math.sqrt(dx*dx + dy*dy);
+            // splice it if it goes off-bounds:
+            if (projectiles[i].x < 0 - projectiles[i].radius * 2 || projectiles[i].x > canvasWidth + projectiles[i].radius * 2) {
+              projectiles.splice(i, 1);
+                i--;
+            }
+            
+            // // checking for collision between current projectile and its target:
+            else if (distance < projectiles[i].radius + 25) {
+                 if (projectiles[i].damageCounted == false) {
+            //         // play hit sounds
+
+            //         projectiles[i].target.health -= projectiles[i].damage;
+            //         projectiles[i].damageCounted = true;
+                     projectiles.splice(i, 1);
+            //         i--;
+                 }
+             }
+            }
+          }
+          }
     function Player(width, height, color, x, y, name,id,skin) {
       if (skin == "danky"){
-        this.skin = Danky;
+        this.skin = 'img/animations/danky/Danky';
       }
       else if(skin == "oats"){
-        this.skin = Oats
+        this.skin = 'img/animations/oats/Oats';
       }
       else{
-        this.skin = Mr;
+        this.skin = 'img/animations/mrgoose/mrgoose';
       }
-        this.healthBar = new Healthbar(playerList.length,100)
+        // starts at frame 1 for simplicity
+        this.frame = 1;
+        // Amount of times per frame set to 10 currently (game runs on 20 ms intervals, animation every 20 * 10 (200) ms changed...)
+        this.frameCount = 0;
+        this.frameCountMax = 10;
+        // animation direction l for left, r for right.
+        this.direction = 'l';
         this.playerName = name;
         this.id = id;
-       // this.type = type;
         this.width = width;
         this.height = height;
         this.speed = 0;
-        this.angle = 0;
-        this.moveAngle = 0;
         this.x = x;
-        this.y = y;    
+        this.y = y;
+        this.health = 5;
+        this.animation = new Image();
+        this.healthBar = new Image();
+        this.takeDamage = function (){
+          console.log(this.playerName + " taking damage.")
+          this.health--;
+        }
         this.update = function() {
             ctx = myGameArea.context;
             ctx.save();
             ctx.translate(this.x, this.y);
-            //ctx.rotate(this.angle);
-            ctx.fillStyle = color;
-            ctx.fillText(name,-15,-20);
-            //ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
-            ctx.drawImage(this.skin,0,0)
-            ctx.restore();    
+            this.animation.src = this.skin + '_' + this.direction + '_idle' + String(this.frame) + ".png";
+            this.healthBar.src = 'img/healthbar/health_' + String(this.health) + '.png'
+            //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+            ctx.drawImage(this.healthBar,0,0,200,100,0,-20,100,50)
+            ctx.drawImage(this.animation,0,0,200,200,0,0,75,75)
+            ctx.fillText(name,25,75);
+            ctx.restore();
+            if (this.frame == 1){
+              this.frameCount++;
+              if (this.frameCount == this.frameCountMax){
+                this.frame = 2;
+                this.frameCount = 0;
+              }
+            
+            }
+            else if (this.frame == 2){
+              this.frameCount++;
+              if (this.frameCount == this.frameCountMax){
+                this.frame = 1;
+                this.frameCount = 0;
+              }
+              
+            }
+        }
+        this.showMessage = function(msg){
+          ctx = myGameArea.context;
+          ctx = save();
+          ctx.fillText(msg,40,100);
         }
         this.newPos = function() {
-            this.angle += this.moveAngle * Math.PI / 180;
-            //this.x += this.speed * Math.sin(this.angle);
-            //this.y -= this.speed * Math.cos(this.angle);
             this.x += this.Xspeed;
             this.y -= this.Yspeed;
-            console.log(this.x, this.y);
+           // console.log(this.x, this.y);
         }
     }
-    
+    function blast(){
+      console.log("blasting");
+      shoot();
+      shoot();
+      shoot();
+    }
+    function shoot(){
+      console.log("shooting")
+      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false});
+    }
     function updateGameArea() {
          myGameArea.clear();
          handleBackground();
+         HandleProjectiles();
          myGamePiece = playerList[findPlayerInList(socket.id)];
          for (i = 0; i < playerList.length; i += 1) {
-
-          // playerList[i].newPos();
           playerList[i].update();
           }
+        let movementspeed = 6;
          myGamePiece.Xspeed = 0;
          myGamePiece.Yspeed = 0;
-         if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.Xspeed = -1; }
-         if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.Xspeed = 1; }
-         if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.Yspeed = 1; }
-         if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.Yspeed= -1; }
+         if (myGameArea.keys && myGameArea.keys[37]) {
+           // moving to the left
+           myGamePiece.direction = 'l';
+           myGamePiece.Xspeed = -1 * movementspeed; 
+          }
+         if (myGameArea.keys && myGameArea.keys[39]) {
+           // moving to the right
+           myGamePiece.direction = 'r';
+           myGamePiece.Xspeed = 1 * movementspeed; 
+          }
+         if (myGameArea.keys && myGameArea.keys[38]) {
+           // moving up
+           myGamePiece.Yspeed = 1 * movementspeed;
+           }
+         if (myGameArea.keys && myGameArea.keys[40]) {
+           // moving down
+           myGamePiece.Yspeed= -1 * movementspeed; 
+          }
+          if (myGameArea.keys && myGameArea.keys[32])
+          {
+            if (shootCharge >= 25){
+            shoot();
+            shootCharge = 0;
+            }
+            // shoot bread spacebar
+          }
+          if (myGameArea.keys && myGameArea.keys[16]){
+            if (shootCharge >= 25){
+            blast();
+            shootCharge = -50;
+            }
+          }
+          // shoot charge needs to be enforced by the server to avoid tampering with attack speed in the future updates.
+          if (shootCharge < 25){
+            shootCharge++;
+          }
          myGamePiece.newPos();
-        //myGamePiece.update();
-        socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,angle:myGamePiece.angle});
-        
-
+        socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
+      
     }
         socket.on('updatePlayers', function(newPlayerList) {
           let tmpList = []
@@ -279,15 +330,39 @@ text-transform: none;
           //console.log(playerList);
          // console.log(socket.id)
         });
-        socket.on("playerMovement",function(playerMovment){
-            let id = playerMovment["id"];
-            let x = playerMovment["x"];
-            let y = playerMovment["y"];
-            let angle = playerMovment["angle"];
+        socket.on('updateProjectiles',function(projectile){
+         
+            tmpProjectile = new BreadProjectile(String(projectile['id']));
+          
+          projectiles.push(tmpProjectile)
+          console.log(projectiles)
+          //document.getElementById("playerList").innerText = playersInLobby;
+          //document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
+        })
+        socket.on('playerHit',function(id){
+          console.log("hit received.")
+          playerList[findPlayerInList(id)].takeDamage();
+          if (playerList[findPlayerInList(id)].health <= 0){
+          playerList.splice(findPlayerInList(id),1);
+          socket.emit('playerDeath', id);
+          }
+        })
+        socket.on('message',function(msg){
+          let id = msg['id'];
+          playerList[findPlayerInList(id)].showMessage(msg['msg']);
+          console.log(msg);
+        })
+        socket.on("playerMovement",function(playerMovement){
+            let id = playerMovement["id"];
+            let x = playerMovement["x"];
+            let y = playerMovement["y"];
+            let direction = playerMovement['direction'];
+            // let angle = playerMovment["angle"];
             
             playerList[findPlayerInList(id)].x = x;
             playerList[findPlayerInList(id)].y = y;
-            playerList[findPlayerInList(id)].angle = angle;
+            playerList[findPlayerInList(id)].direction = direction;
+            // playerList[findPlayerInList(id)].angle = angle;
         });
         socket.on("startGame",function(lobby){
           //console.log("received start game call from server.")
