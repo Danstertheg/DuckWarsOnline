@@ -28,6 +28,20 @@ font-style: normal;
 font-variant: normal;
 text-transform: none;
 }
+.playerInfo{
+  width:100%;
+  text-align: left;
+}
+.playerStatus{
+  display:flex;
+  align-items: center;
+  margin:auto;
+width:1000px;
+}
+.life{
+  width:75px;
+  height:75px;
+}
 .joinForm{
   text-align: center;
 }
@@ -52,4 +66,26 @@ text-transform: none;
 }
 #playerCount{
   color:black;
+}
+#specialBar {
+  margin:0;
+  width: 350px;
+  height: 40px;
+ background: rgba(0,0,0,1);
+ border: 2px solid rgba(255,255,255,1);
+ border-radius: 5px;
+ box-shadow: 0px 0px 10px 5px rgba(255,255,255,0.2);
+ overflow: hidden;
+}
+
+#specialFill {
+ width: 350px;
+  height: 40px;
+ background: #08c1f0;
+ float: left;
+ /*animation: stretch 5s infinite linear;*/
+ 
+}
+.statusText {
+  color:black
 }

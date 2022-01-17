@@ -1,19 +1,23 @@
+const PlayerLobby = require("./modules/PlayerLobby");
 const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server, Socket } = require("socket.io");
 const io = new Server(server);
-// list of players
+// all these vars will be needed in the future when creating a playerLobby class. 
+// leader id is the socket connection id of the lobby leader. so that only this character can start the match and select game mode in the future.
+var leaderId;
 var playerList = [];
 var projectiles = [];
 var playerCount = 0;
 const roomSize = 4;
-var colors = ["blue","red","green","orange","black","navy"]
+var gameStarted = false;
+var gameEnded = false;
 var skins = ["oats","danky","mr.goose","mr.goose"];
-app.use(express.static(__dirname));
+app.use(express.static(__dirname +"/www"));
 app.get('/', (req, res) => {
-  console.log("__dirname is : "+__dirname)
+  console.log("__dirname is : "+__dirname +"/www")
   res.sendFile(__dirname + '/index.html');
 });
 function findPlayerInList(id){
@@ -25,35 +29,52 @@ function findPlayerInList(id){
   return null
  }
 io.on('connection', (socket) => {
+  io.emit("gameStatus", {started:gameStarted,ended:gameEnded});
+  io.emit('updatePlayers', playerList);
     socket.on('message', (msg) => {
       io.emit('message', msg);
     });
 
     socket.on('playerJoined', (playerInitObj) => {
-        // if the player limit is not exceeded, let the player join
         if (playerCount < roomSize){
+        // if the player limit is not exceeded, let the player join
           let playerSkin = skins[playerCount]
           let playerId = socket.id;
           let playerPositionY = Math.floor((Math.random() * 225) + 1);
           let playerPositionX = Math.floor((Math.random() * 225) + 1);
-          let playerColor = colors[Math.floor(Math.random()* colors.length)];
           //JSON Object
           let newplayer = {
             id:playerId,
             x:playerPositionX,
             y:playerPositionY,
-            color:playerColor,
             name:playerInitObj["playerName"],
             skin:playerSkin,
-            direction:'l'
+            direction:'l',
+            health:5,
+            lives:3
           };
-          // [{},{},{}]
+          if (!playerList.some(item => item.id == socket.id))
+          {
+            // player is not already in playerList 
+            if (gameStarted == false){
+              // game has not yet started
+          console.log("serverVerified new player")
           playerList.push(newplayer);
           // count 
           playerCount++;
           console.log(playerList);
           console.log("Current Player Count: " + String(playerCount))
           io.emit('updatePlayers', playerList);
+            }
+            else {
+              // game has already started, the player is late to the lobby and needs to wait for gameStarted boolean to reset once game is over. 
+              console.log("Player is attempting to join game that has already begun")
+            } 
+        }
+          else {
+            // player is attempting to join twice, their socket id is already registered in the playerList
+            console.log("player attempting to double join!!!! caught you bitch")
+          }
         }
         else{ // playercount is exceeded... dont allow to join 
         console.log("room size full. Sorry mate")
@@ -65,13 +86,22 @@ io.on('connection', (socket) => {
         let x = playerMov['x'];
         let y = playerMov['y'];
         let direction = playerMov['direction'];
+        if (playerList.some(item => item.id == id)){
         playerList[findPlayerInList(id)].x = x;
         playerList[findPlayerInList(id)].y = y;
         playerList[findPlayerInList(id)].direction = direction;
+        }
         
       })
       socket.on('playerShot',(projectile) => {
         console.log(projectile['id'] + " has shot.")
+        //check if the person is in the playerlist on the server before allowing them to shoot TODO HERE
+        projectiles.push(projectile)
+        console.log(projectiles)
+        io.emit('updateProjectiles', projectile);
+      })
+      socket.on('waterBlast',(projectile)=> {
+        console.log(projectile['id'] + " has waterBlasted.")
         projectiles.push(projectile)
         console.log(projectiles)
         io.emit('updateProjectiles', projectile);
@@ -80,7 +110,10 @@ io.on('connection', (socket) => {
         io.emit('updatedProjectiles', projectiles)
       })
       socket.on('startGame',(lobby) => {
+        if (gameStarted == false){
         io.emit('startGame');
+        gameStarted = true;
+        }
       })
       
 
@@ -91,6 +124,9 @@ io.on('connection', (socket) => {
             console.log(playerList[i].id + " just disconnected")
             playerList.splice(i, 1)
             playerCount--;
+            if (playerCount == 0){
+              gameStarted = false;
+            }
             console.log("Current Player Count: " + String(playerCount))
           }
         }
@@ -123,7 +159,22 @@ function calculateProjectilesPath(){
                     // play hit sounds
                     // deal damage
                     console.log(playerList[j].name + " was hit.")
+                    playerList[j].health--;
                     io.emit("playerHit", playerList[j].id)
+                    if (playerList[j].health <= 0){
+                        console.log("this player has died or lost a life")
+                        if (playerList[j].lives <= 1){
+                          console.log("this player has lost their last life. They are out of the game");
+                          io.emit("playerLose", playerList[j].id)
+                          playerList.splice(j,1);
+                        }
+                        else{
+                          playerList[j].lives--;
+                          playerList[j].health = 5;
+                          io.emit("loseLife", playerList[j].id);
+                        }
+                    }
+                    
                     //projectiles[i].target.health -= projectiles[i].damage;
                     projectiles[i].damageCounted = true;
                     projectiles.splice(i, 1);

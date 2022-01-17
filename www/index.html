@@ -11,7 +11,47 @@
   <img src="img/logo.png" style = "width:80px;height:50px;">
 </p>
 
+<!-- <div class = "playerInfo">
+  <div class = "lifeContainer">
+    <div class = "lifeBar" style = "overflow:hidden;width:300px;height:100px;">
+    <img src="img//healthbar/health_5.png" style = "width:100%;height:100%;">
+    </div>
+    <div id = "specialBar">
+      <div id = "specialFill">
+  
+      </div>
+    </div>
+    <img src = "img/animations/danky/Danky_l_idle1.png" class = "life">
+    <img src = "img/animations/danky/Danky_l_idle1.png" class = "life">
+    <img src = "img/animations/danky/Danky_l_idle1.png" class = "life">
+  </div>
+</div> -->
+
 <div id = "canvasHolder"></div>
+<template id = "playerTemplate">
+  <div class = "playerStatus">
+
+    <span class = "statusText">Health: </span> 
+     <div class = "lifeBar" style = "overflow:hidden;width:300px;height:100px;">
+     <img id = "healthBarImage" src="img//healthbar/health_5.png" style = "width:100%;height:100%;">
+     </div>
+ 
+    <span class = "statusText">Charge: </span>
+     <div id = "specialBar">
+       <div id = "specialFill"></div>
+     </div>
+ 
+   <span class = "statusText">Lives: </span> 
+   <div class = "LifeHolder" id = "lifeHolder">    
+  
+   </div> 
+ 
+   </div>
+</template>
+<div id ="playerInfo" class = "playerInfo">
+  
+</div>
+
 <p style = "text-align: center;">
   <input id = "message" type="text" style = "width:800px;" placeholder = "send a message here... (Not yet supported)...">
   <button onclick = "sendMessage()" class = "btn-primary" style = "width:200px;">Send</button>
@@ -33,11 +73,13 @@
     </div>
     <p class = "gameInstructions">Make sure the gamearea has focus, and use the arrow keys to move, spacebar to shoot. Note: all players must be in lobby before starting</p>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/Player.js"></script>
+    <script src='js/BreadProjectile.js'></script>
+    <script src='js/WaterBlast.js'></script>
+    <script src='js/WaterShot.js'></script>
     <script>
     var socket = io();
-
     var shootCharge = 0;
-
     var myGamePiece;
    // playerId is self position in playerList 
     var playerId;
@@ -57,6 +99,18 @@
     var canvasHeight = 600;
     // different colors player could be, instead here we should replace with ducks
     //var colors = ["blue","red","green","orange","black","navy"]
+    var gameStarted = false;
+    var gameEnded = false;
+    var spectateMode = false;
+    var loadedPlayerInfo = false;
+    function checkSelf(id){
+      if (id == socket.id){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
     function sendMessage(){
       console.log("hi");
       let message = document.getElementById("message").value;
@@ -79,14 +133,22 @@
     function joinGame(){
       if (playerId == null)
       {
-        socket.emit('playerJoined',{playerName:document.getElementById("playerName").value,id:socket.id});
+        playerId = socket.id;
+        socket.emit('playerJoined',{playerName:document.getElementById("playerName").value,id:playerId});
       }
     }
     function createLobby(){
       myGameArea.create();
     }
     function startGame() {
+      if (gameStarted == false){
         socket.emit('startGame');
+        gameStarted = true;
+      }
+      else {
+        //TODO: show toast image (notification) that the match has already started. 
+        console.log("game already started.");
+      }
     }
     
     var myGameArea = {
@@ -119,41 +181,9 @@
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
- // Projectile=======================================================
-    const breadShotImage = new Image();
-    breadShotImage.src = 'img/breadProjectile.png';
-    class BreadProjectile {
-        constructor(shooter) {
-            //this.target = opponent; // ? THIS WAY? or maybe only target is needed since it will never collide with player. 
-            this.shooter = playerList[findPlayerInList(shooter)]
-            this.x = (this.shooter.direction == 'r') ? this.shooter.x + 25 : this.shooter.x - 25;
-            this.y = this.shooter.y;
-            this.radius = 10;
-            this.speed = 20;
-            this.direction = this.shooter.direction; // set in constructor and then never changed 
-            this.distance; // distance between it and opponent
-            this.damage = 10;
-            this.damageCounted = false;
-        }
-        update() {
-            if (this.direction == 'l')
-                this.x -= this.speed;
-            else
-                this.x += this.speed;
 
-            // calculate distance between it and opponent
-           // const dx = this.x - this.target.x;
-           // const dy = this.y - this.target.y;
-            //this.distance = Math.sqrt(dx*dx + dy*dy); //pythegorean theorem!
-        }
-        draw() {
-            ctx = myGameArea.context;
-
-            ctx.drawImage(breadShotImage, this.x + 11, this.y + 11, this.radius * 2.5, this.radius * 2.5);
-        }
-        
-    }
     function HandleProjectiles() {
+      console.log("handle projectiles")
       for (j in playerList){
         for (i in projectiles){
           projectiles[i].update();
@@ -169,9 +199,10 @@
             
             // // checking for collision between current projectile and its target:
             else if (distance < projectiles[i].radius + 25) {
-                 if (projectiles[i].damageCounted == false) {
+                 if (projectiles[i].damageCounted == false && String(playerList[j].id) !== String(projectiles[i].id)) {
             //         // play hit sounds
-
+            console.log ("projectiles with id " + String(projectiles[i].id) + " has just hit player with id " + String (playerList[j].id))
+                      console.log("hit")
             //         projectiles[i].target.health -= projectiles[i].damage;
             //         projectiles[i].damageCounted = true;
                      projectiles.splice(i, 1);
@@ -181,97 +212,30 @@
             }
           }
           }
-    function Player(width, height, color, x, y, name,id,skin) {
-      if (skin == "danky"){
-        this.skin = 'img/animations/danky/Danky';
-      }
-      else if(skin == "oats"){
-        this.skin = 'img/animations/oats/Oats';
-      }
-      else{
-        this.skin = 'img/animations/mrgoose/mrgoose';
-      }
-        // starts at frame 1 for simplicity
-        this.frame = 1;
-        // Amount of times per frame set to 10 currently (game runs on 20 ms intervals, animation every 20 * 10 (200) ms changed...)
-        this.frameCount = 0;
-        this.frameCountMax = 10;
-        // animation direction l for left, r for right.
-        this.direction = 'l';
-        this.playerName = name;
-        this.id = id;
-        this.width = width;
-        this.height = height;
-        this.speed = 0;
-        this.x = x;
-        this.y = y;
-        this.health = 5;
-        this.animation = new Image();
-        this.healthBar = new Image();
-        this.takeDamage = function (){
-          console.log(this.playerName + " taking damage.")
-          this.health--;
-        }
-        this.update = function() {
-            ctx = myGameArea.context;
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            this.animation.src = this.skin + '_' + this.direction + '_idle' + String(this.frame) + ".png";
-            this.healthBar.src = 'img/healthbar/health_' + String(this.health) + '.png'
-            //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-            ctx.drawImage(this.healthBar,0,0,200,100,0,-20,100,50)
-            ctx.drawImage(this.animation,0,0,200,200,0,0,75,75)
-            ctx.fillText(name,25,75);
-            ctx.restore();
-            if (this.frame == 1){
-              this.frameCount++;
-              if (this.frameCount == this.frameCountMax){
-                this.frame = 2;
-                this.frameCount = 0;
-              }
-            
-            }
-            else if (this.frame == 2){
-              this.frameCount++;
-              if (this.frameCount == this.frameCountMax){
-                this.frame = 1;
-                this.frameCount = 0;
-              }
-              
-            }
-        }
-        this.showMessage = function(msg){
-          ctx = myGameArea.context;
-          ctx = save();
-          ctx.fillText(msg,40,100);
-        }
-        this.newPos = function() {
-            this.x += this.Xspeed;
-            this.y -= this.Yspeed;
-           // console.log(this.x, this.y);
-        }
-    }
+
     function blast(){
-      console.log("blasting");
-      shoot();
-      shoot();
-      shoot();
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      socket.emit('waterBlast',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterBlast'})
     }
     function shoot(){
       console.log("shooting")
       // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
       let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
       let Y = myGamePiece.y; 
-      socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false});
+      socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'bread'});
     }
     function updateGameArea() {
          myGameArea.clear();
          handleBackground();
          HandleProjectiles();
-         myGamePiece = playerList[findPlayerInList(socket.id)];
          for (i = 0; i < playerList.length; i += 1) {
           playerList[i].update();
           }
+         if (spectateMode == false){
+           // if the person is a player, not a spectator. then proceed to collect controller input and send. 
+         myGamePiece = playerList[findPlayerInList(socket.id)];
+         
         let movementspeed = 6;
          myGamePiece.Xspeed = 0;
          myGamePiece.Yspeed = 0;
@@ -304,7 +268,7 @@
           if (myGameArea.keys && myGameArea.keys[16]){
             if (shootCharge >= 25){
             blast();
-            shootCharge = -50;
+            shootCharge = 0;
             }
           }
           // shoot charge needs to be enforced by the server to avoid tampering with attack speed in the future updates.
@@ -313,63 +277,12 @@
           }
          myGamePiece.newPos();
         socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
-      
+        }
     }
-        socket.on('updatePlayers', function(newPlayerList) {
-          let tmpList = []
-          playersInLobby = "";
-          for (x in newPlayerList){
-            player = newPlayerList[x];
-            tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"],player["skin"]);
-            tmpList.push(tmpPlayer);
-            playersInLobby += player["name"] + ","
-          }
-          playerList = tmpList;
-          document.getElementById("playerList").innerText = playersInLobby;
-          document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
-          //console.log(playerList);
-         // console.log(socket.id)
-        });
-        socket.on('updateProjectiles',function(projectile){
-         
-            tmpProjectile = new BreadProjectile(String(projectile['id']));
-          
-          projectiles.push(tmpProjectile)
-          console.log(projectiles)
-          //document.getElementById("playerList").innerText = playersInLobby;
-          //document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
-        })
-        socket.on('playerHit',function(id){
-          console.log("hit received.")
-          playerList[findPlayerInList(id)].takeDamage();
-          if (playerList[findPlayerInList(id)].health <= 0){
-          playerList.splice(findPlayerInList(id),1);
-          socket.emit('playerDeath', id);
-          }
-        })
-        socket.on('message',function(msg){
-          let id = msg['id'];
-          playerList[findPlayerInList(id)].showMessage(msg['msg']);
-          console.log(msg);
-        })
-        socket.on("playerMovement",function(playerMovement){
-            let id = playerMovement["id"];
-            let x = playerMovement["x"];
-            let y = playerMovement["y"];
-            let direction = playerMovement['direction'];
-            // let angle = playerMovment["angle"];
-            
-            playerList[findPlayerInList(id)].x = x;
-            playerList[findPlayerInList(id)].y = y;
-            playerList[findPlayerInList(id)].direction = direction;
-            // playerList[findPlayerInList(id)].angle = angle;
-        });
-        socket.on("startGame",function(lobby){
-          //console.log("received start game call from server.")
-          myGameArea.start();
-        })
         createLobby()
       </script>
+      <!-- !!!IMPORTANT: Client.JS depends on other javascript code, this must be last.-->
+      <script src="js/Client.js"></script>
 </body>
 
 </html>
