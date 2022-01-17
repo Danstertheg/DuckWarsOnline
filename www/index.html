@@ -43,7 +43,6 @@
  
    <span class = "statusText">Lives: </span> 
    <div class = "LifeHolder" id = "lifeHolder">    
-  
    </div> 
  
    </div>
@@ -114,7 +113,7 @@
     function sendMessage(){
       console.log("hi");
       let message = document.getElementById("message").value;
-      socket.emit('message',{msg:message,id:socket.id})
+      socket.emit('message',{msg:message,id:socket.id});
     }
     const background = new Image();
         background.src = 'img/lake.png';
@@ -159,7 +158,7 @@
             this.context = this.canvas.getContext("2d");
             let game = document.getElementById("canvasHolder");
             // change the use of innerhtml possibly in the future.
-            game.appendChild(this.canvas)
+            game.appendChild(this.canvas);
             //document.body.insertBefore(this.canvas, document.body.childNodes[3]);
         },
         start : function() {
@@ -183,7 +182,7 @@
     }
 
     function HandleProjectiles() {
-      console.log("handle projectiles")
+      console.log("handle projectiles");
       for (j in playerList){
         for (i in projectiles){
           projectiles[i].update();
@@ -201,8 +200,8 @@
             else if (distance < projectiles[i].radius + 25) {
                  if (projectiles[i].damageCounted == false && String(playerList[j].id) !== String(projectiles[i].id)) {
             //         // play hit sounds
-            console.log ("projectiles with id " + String(projectiles[i].id) + " has just hit player with id " + String (playerList[j].id))
-                      console.log("hit")
+            console.log ("projectiles with id " + String(projectiles[i].id) + " has just hit player with id " + String (playerList[j].id));
+                      console.log("hit");
             //         projectiles[i].target.health -= projectiles[i].damage;
             //         projectiles[i].damageCounted = true;
                      projectiles.splice(i, 1);
@@ -216,7 +215,7 @@
     function blast(){
       let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
       let Y = myGamePiece.y; 
-      socket.emit('waterBlast',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterBlast'})
+      socket.emit('waterBlast',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterBlast'});
     }
     function shoot(){
       console.log("shooting")
@@ -224,6 +223,13 @@
       let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
       let Y = myGamePiece.y; 
       socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'bread'});
+    }
+    function waterShot(){
+      console.log("shooting")
+      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      socket.emit('waterShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterShot'});
     }
     function updateGameArea() {
          myGameArea.clear();
@@ -271,6 +277,12 @@
             shootCharge = 0;
             }
           }
+          if (myGameArea.keys && myGameArea.keys[90]){
+            if (shootCharge >= 25){
+            waterShot();
+            shootCharge = 0;
+            }
+          }
           // shoot charge needs to be enforced by the server to avoid tampering with attack speed in the future updates.
           if (shootCharge < 25){
             shootCharge++;
@@ -279,7 +291,7 @@
         socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
         }
     }
-        createLobby()
+        createLobby();
       </script>
       <!-- !!!IMPORTANT: Client.JS depends on other javascript code, this must be last.-->
       <script src="js/Client.js"></script>

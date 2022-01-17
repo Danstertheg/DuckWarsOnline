@@ -43,7 +43,7 @@ function Player(width, height, color, x, y, name,id,skin) {
           ctx.translate(this.x, this.y);
           this.animation.src = this.skin + '_' + this.direction + '_idle' + String(this.frame) + ".png";
           this.healthBar.src = 'img/healthbar/health_' + String(this.health) + '.png'
-          //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+          ////////////drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
           ctx.drawImage(this.healthBar,0,0,200,100,0,-20,100,50)
           ctx.drawImage(this.animation,0,0,200,200,0,0,75,75)
           ctx.fillText(name,25,75);

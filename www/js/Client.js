@@ -41,6 +41,10 @@ socket.on('updatePlayers', function(newPlayerList) {
         tmpProjectile = new WaterBlast(String(projectile['id']));
         console.log("received waterblast")
       }
+      else if (projectile['type'] == 'waterShot')
+      {
+        tmpProjectile = new WaterShot(String(projectile['id']));
+      }
       else{
       tmpProjectile = new BreadProjectile(String(projectile['id']));
       }
@@ -49,19 +53,22 @@ socket.on('updatePlayers', function(newPlayerList) {
     //document.getElementById("playerList").innerText = playersInLobby;
     //document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
   })
-  socket.on('playerHit',function(id){
+  socket.on('playerHit',function(projectile){
     console.log("hit received.")
+    let id = projectile['id'];
+    if (projectile['type'] == 'waterShot'){
+        playerList[findPlayerInList(id)].takeDamage();
+        playerList[findPlayerInList(id)].takeDamage();
+    }
+    else if (projectile['type' == 'bread']){
     playerList[findPlayerInList(id)].takeDamage();
+    }
     if (id = myGamePiece.id){
         let src = 'img/healthbar/health_' + playerList[findPlayerInList(id)].health + '.png'; 
         let myHealthbar = document.getElementById('healthBarImage');
         myHealthbar.src = src;
     }
 
-    //if (playerList[findPlayerInList(id)].health <= 0){
-    //playerList.splice(findPlayerInList(id),1);
-   //socket.emit('playerDeath', id);
-    //}
     })
   socket.on('playerLose',function(id){
     //playerList.splice(findPlayerInList(id),1);  

@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
             // player is not already in playerList 
             if (gameStarted == false){
               // game has not yet started
-          console.log("serverVerified new player")
+          console.log("serverVerified new player");
           playerList.push(newplayer);
           // count 
           playerCount++;
@@ -68,16 +68,16 @@ io.on('connection', (socket) => {
             }
             else {
               // game has already started, the player is late to the lobby and needs to wait for gameStarted boolean to reset once game is over. 
-              console.log("Player is attempting to join game that has already begun")
+              console.log("Player is attempting to join game that has already begun");
             } 
         }
           else {
             // player is attempting to join twice, their socket id is already registered in the playerList
-            console.log("player attempting to double join!!!! caught you bitch")
+            console.log("player attempting to double join!!!! caught you bitch");
           }
         }
         else{ // playercount is exceeded... dont allow to join 
-        console.log("room size full. Sorry mate")
+        console.log("room size full. Sorry mate");
         }
       });
       socket.on('playerMovement',(playerMov) => {
@@ -96,18 +96,24 @@ io.on('connection', (socket) => {
       socket.on('playerShot',(projectile) => {
         console.log(projectile['id'] + " has shot.")
         //check if the person is in the playerlist on the server before allowing them to shoot TODO HERE
-        projectiles.push(projectile)
-        console.log(projectiles)
+        projectiles.push(projectile);
+        console.log(projectiles);
         io.emit('updateProjectiles', projectile);
       })
       socket.on('waterBlast',(projectile)=> {
         console.log(projectile['id'] + " has waterBlasted.")
-        projectiles.push(projectile)
-        console.log(projectiles)
+        projectiles.push(projectile);
+        console.log(projectiles);
+        io.emit('updateProjectiles', projectile);
+      })
+      socket.on('waterShot',(projectile) =>{
+        console.log(projectile['id'] + " has waterBlasted.")
+        projectiles.push(projectile);
+        console.log(projectiles);
         io.emit('updateProjectiles', projectile);
       })
       socket.on('requestProjectileLocation',(projectile)=>{
-        io.emit('updatedProjectiles', projectiles)
+        io.emit('updatedProjectiles', projectiles);
       })
       socket.on('startGame',(lobby) => {
         if (gameStarted == false){
@@ -121,8 +127,8 @@ io.on('connection', (socket) => {
         console.log("disconnect")
         for(var i = 0; i < playerList.length; i++ ){
           if(playerList[i].id === socket.id){
-            console.log(playerList[i].id + " just disconnected")
-            playerList.splice(i, 1)
+            console.log(playerList[i].id + " just disconnected");
+            playerList.splice(i, 1);
             playerCount--;
             if (playerCount == 0){
               gameStarted = false;
@@ -134,11 +140,16 @@ io.on('connection', (socket) => {
       })
   });
 function calculateProjectilesPath(){
-  let speed = 20;
+  var speed = 20;
   let radius = 10;
   let playerRadius = 30;
   let canvasWidth = 1000;
   for (i in projectiles){
+    let type = projectiles[i].type 
+    if (type == "waterShot"){
+      speed = 25
+    }
+
     if (projectiles[i].direction == 'l')
     {
       projectiles[i].x -= speed;
@@ -150,6 +161,7 @@ function calculateProjectilesPath(){
     //console.log(projectiles)
      for (j in playerList){
       for (i in projectiles){
+        
       const dx = projectiles[i].x - playerList[j].x;
       const dy = projectiles[i].y - playerList[j].y;
       let distance = Math.sqrt(dx*dx + dy*dy); //pythegorean theorem!
@@ -158,14 +170,22 @@ function calculateProjectilesPath(){
                 if (projectiles[i].damageCounted == false && playerList[j].id != projectiles[i].id) {
                     // play hit sounds
                     // deal damage
-                    console.log(playerList[j].name + " was hit.")
-                    playerList[j].health--;
-                    io.emit("playerHit", playerList[j].id)
+                    console.log(playerList[j].name + " was hit.");
+                    let type = projectiles[i].type 
+                    if (type == 'waterShot'){
+                      playerList[j].health--;
+                      playerList[j].health--;
+                    }
+                    else if (type = 'bread')
+                    {
+                      playerList[j].health--;
+                    }
+                    io.emit("playerHit", {id:playerList[j].id,type:projectiles[i].type});
                     if (playerList[j].health <= 0){
-                        console.log("this player has died or lost a life")
+                        console.log("this player has died or lost a life");
                         if (playerList[j].lives <= 1){
                           console.log("this player has lost their last life. They are out of the game");
-                          io.emit("playerLose", playerList[j].id)
+                          io.emit("playerLose", playerList[j].id);
                           playerList.splice(j,1);
                         }
                         else{
@@ -190,7 +210,7 @@ function calculateProjectilesPath(){
 }
 
 function runGame(){
-calculateProjectilesPath()
+calculateProjectilesPath();
 }
 
 setInterval(runGame,20)
