@@ -15,6 +15,7 @@ const roomSize = 4;
 var gameStarted = false;
 var gameEnded = false;
 var skins = ["oats","danky","mr.goose","mr.goose"];
+
 app.use(express.static(__dirname +"/www"));
 app.get('/', (req, res) => {
   console.log("__dirname is : "+__dirname +"/www")
@@ -34,6 +35,34 @@ io.on('connection', (socket) => {
     socket.on('message', (msg) => {
       io.emit('message', msg);
     });
+
+
+    // NEW CODE START
+
+    socket.on('getPlayerCount', () => {
+      io.to(socket.id).emit('playerCount', playerList.length);
+    });
+
+    socket.on('getGameStarted', () => {
+      io.to(socket.id).emit('gameStarted', gameStarted);
+    });
+
+    socket.on('chatMessage', (msg) => {
+      io.emit('chatMessage', msg);
+    });
+
+    socket.on('playerJoinedLobby', (playerInfo) => {
+      io.emit('playerJoinedLobby', playerInfo);
+    });
+
+    socket.on('lastPlayerLeft', () => {
+      console.log(" we do a lil tomfoolery");
+      gameStarted = false;
+      playerCount = 0;
+    });
+
+    // NEW CODE END
+
 
     socket.on('playerJoined', (playerInitObj) => {
         if (playerCount < roomSize){
@@ -118,7 +147,10 @@ io.on('connection', (socket) => {
       
 
       socket.on('disconnect', function() {
-        console.log("disconnect")
+        // NEW CODE START!
+        io.emit('playerLeftLobby');
+        // NEW CODE END!
+
         for(var i = 0; i < playerList.length; i++ ){
           if(playerList[i].id === socket.id){
             console.log(playerList[i].id + " just disconnected")
