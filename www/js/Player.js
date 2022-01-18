@@ -10,6 +10,11 @@ function Player(width, height, color, x, y, name,id,skin) {
     }
       // starts at frame 1 for simplicity
       this.frame = 1;
+      this.mana = 1000;
+      this.maxMana = 1000;
+      this.manaRegenRate = 1;
+      this.attackDelay = 15;
+      this.attackTick = 15;
       // Amount of times per frame set to 10 currently (game runs on 20 ms intervals, animation every 20 * 10 (200) ms changed...)
       this.frameCount = 0;
       this.frameCountMax = 10;
@@ -36,6 +41,11 @@ function Player(width, height, color, x, y, name,id,skin) {
       }
       this.revive = function (){
           this.health = 5;
+      }
+      this.regenMana = function(){
+        if (this.mana <= this.maxMana){
+          this.mana = this.mana + this.manaRegenRate;
+        }
       }
       this.update = function() {
           ctx = myGameArea.context;

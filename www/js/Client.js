@@ -1,4 +1,4 @@
-// const { range } = require("express/lib/request");
+
 
 socket.on('updatePlayers', function(newPlayerList) {
     let tmpList = []
@@ -37,17 +37,18 @@ socket.on('updatePlayers', function(newPlayerList) {
    }
   });
   socket.on('updateProjectiles',function(projectile){
-      if (projectile['type'] == 'waterBlast'){
+    let type = projectile['type'];
+      if ( type == 'waterBlast'){
         tmpProjectile = new WaterBlast(String(projectile['id']));
-        console.log("received waterblast")
       }
-      else if (projectile['type'] == 'waterShot')
+      else if (type == 'waterShot')
       {
         tmpProjectile = new WaterShot(String(projectile['id']));
       }
-      else{
+      else if (type == 'bread'){
       tmpProjectile = new BreadProjectile(String(projectile['id']));
-      }
+
+    }
     projectiles.push(tmpProjectile)
     console.log(projectiles)
     //document.getElementById("playerList").innerText = playersInLobby;
@@ -56,15 +57,20 @@ socket.on('updatePlayers', function(newPlayerList) {
   socket.on('playerHit',function(projectile){
     console.log("hit received.")
     let id = projectile['id'];
+    console.log("id is :" + id + " and my id is " + myGamePiece.id)
     if (projectile['type'] == 'waterShot'){
         playerList[findPlayerInList(id)].takeDamage();
         playerList[findPlayerInList(id)].takeDamage();
     }
-    else if (projectile['type' == 'bread']){
+    else if (projectile['type']== 'bread'){
     playerList[findPlayerInList(id)].takeDamage();
+    }
+    if (playerList[findPlayerInList(id)].health < 0){
+      playerList[findPlayerInList(id)].health = 0;
     }
     if (id = myGamePiece.id){
         let src = 'img/healthbar/health_' + playerList[findPlayerInList(id)].health + '.png'; 
+        console.log(src)
         let myHealthbar = document.getElementById('healthBarImage');
         myHealthbar.src = src;
     }
@@ -124,6 +130,9 @@ socket.on('updatePlayers', function(newPlayerList) {
     //console.log("received start game call from server.")
     myGameArea.start();
   })
+  socket.on("winner",function(winnerId){
+    console.log("winner id is " + winnerId)
+  })
   socket.on("gameStatus",function(gameStatus){
         let started = gameStatus['started'];
         //let ended = gameStatus['ended'];
@@ -134,9 +143,14 @@ socket.on('updatePlayers', function(newPlayerList) {
         }
         else {
             // the player must have joined a lobby where the game has already started. or begun. 
+            if (!playerList.some(item => item.id == socket.id)){
             spectateMode = true;
             myGameArea.start()
             console.log('please wait the game has already started.')
+            }
+            else {
+              // you are already in the game, someone else must have joined in spectator view
+            }
         }
 
   })

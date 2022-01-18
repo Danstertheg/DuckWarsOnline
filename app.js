@@ -147,7 +147,7 @@ function calculateProjectilesPath(){
   for (i in projectiles){
     let type = projectiles[i].type 
     if (type == "waterShot"){
-      speed = 25
+      speed = 15;
     }
 
     if (projectiles[i].direction == 'l')
@@ -187,6 +187,7 @@ function calculateProjectilesPath(){
                           console.log("this player has lost their last life. They are out of the game");
                           io.emit("playerLose", playerList[j].id);
                           playerList.splice(j,1);
+                          playerCount--;
                         }
                         else{
                           playerList[j].lives--;

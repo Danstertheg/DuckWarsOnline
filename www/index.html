@@ -50,11 +50,12 @@
 <div id ="playerInfo" class = "playerInfo">
   
 </div>
-
+<!----
 <p style = "text-align: center;">
   <input id = "message" type="text" style = "width:800px;" placeholder = "send a message here... (Not yet supported)...">
   <button onclick = "sendMessage()" class = "btn-primary" style = "width:200px;">Send</button>
-</p>         
+</p>       
+-->  
 <h3 style = "text-align: center;">Enter Name to Join Game</h3>
 <p class = "joinForm">
   <label for = "playerName">Enter Name :</label>
@@ -78,7 +79,7 @@
     <script src='js/WaterShot.js'></script>
     <script>
     var socket = io();
-    var shootCharge = 0;
+    //var shootCharge = 0;
     var myGamePiece;
    // playerId is self position in playerList 
     var playerId;
@@ -135,6 +136,12 @@
         playerId = socket.id;
         socket.emit('playerJoined',{playerName:document.getElementById("playerName").value,id:playerId});
       }
+    }
+    function updateManaBar(){
+      let manaFill = document.getElementById("specialFill");
+      let mana = myGamePiece.mana;
+      let manaPercentage = (350/myGamePiece.maxMana) * (myGamePiece.mana); 
+      manaFill.style = "width:"+manaPercentage+"px;" 
     }
     function createLobby(){
       myGameArea.create();
@@ -230,6 +237,8 @@
       let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
       let Y = myGamePiece.y; 
       socket.emit('waterShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterShot'});
+      // let waterAbility = new WaterShot(socket.id);
+      // projectiles.push(waterAbility)
     }
     function updateGameArea() {
          myGameArea.clear();
@@ -263,30 +272,40 @@
            // moving down
            myGamePiece.Yspeed= -1 * movementspeed; 
           }
+
+          if (myGamePiece.attackTick >= myGamePiece.attackDelay){
           if (myGameArea.keys && myGameArea.keys[32])
           {
-            if (shootCharge >= 25){
+            if (myGamePiece.mana >= 50){
             shoot();
-            shootCharge = 0;
+            myGamePiece.mana = myGamePiece.mana - 50;
+            myGamePiece.attackTick = 0;
             }
             // shoot bread spacebar
           }
-          if (myGameArea.keys && myGameArea.keys[16]){
-            if (shootCharge >= 25){
-            blast();
-            shootCharge = 0;
-            }
-          }
+          // if (myGameArea.keys && myGameArea.keys[16]){
+          //   if (myGamePiece.mana >= 250){
+          //   blast();
+          //   myGamePiece.mana = myGamePiece - 250;
+          //   }
+          // }
           if (myGameArea.keys && myGameArea.keys[90]){
-            if (shootCharge >= 25){
+            //ability 
+            if (myGamePiece.mana >= 250){
             waterShot();
-            shootCharge = 0;
+            myGamePiece.mana = myGamePiece.mana - 250;
+            myGamePiece.attackTick = 0
             }
           }
-          // shoot charge needs to be enforced by the server to avoid tampering with attack speed in the future updates.
-          if (shootCharge < 25){
-            shootCharge++;
+        }
+        else{
+          myGamePiece.attackTick++;
+        }
+          // Mana needs to be enforced by the server to avoid tampering with attack speed in the future updates. TODO
+          if (myGamePiece.mana < myGamePiece.maxMana){
+            myGamePiece.regenMana()
           }
+          updateManaBar();
          myGamePiece.newPos();
         socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
         }
