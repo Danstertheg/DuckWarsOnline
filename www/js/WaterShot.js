@@ -24,11 +24,16 @@ class WaterShot{
     }
     draw() {
         ctx = myGameArea.context;
-        if (this.currentFrame < 51){
+        if (this.currentFrame < 10){
             waterShotImage.src = './img/WaterShot/' + String(this.direction) + '/frame_' + String(this.currentFrame) + '_delay-0.04s.gif';
           //  console.log(waterShot.src)
-        this.currentFrame = this.currentFrame + 1;
         ctx.drawImage(waterShotImage, this.x + 11, this.y + 11, this.radius * 2.5, this.radius * 2.5);
+        this.currentFrame = this.currentFrame + 1;
+        }
+        else{
+            this.currentFrame = 3;
+            ctx.drawImage(waterShotImage, this.x + 11, this.y + 11, this.radius * 2.5, this.radius * 2.5);
+            this.currentFrame = this.currentFrame + 1;
         }
     }
 }

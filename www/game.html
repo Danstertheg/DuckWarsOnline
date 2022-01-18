@@ -129,7 +129,12 @@
         socket.emit('playerJoined',{playerName:username,id:playerId});
       }
     }
-
+    function updateManaBar(){
+      let manaFill = document.getElementById("specialFill");
+      let mana = myGamePiece.mana;
+      let manaPercentage = (350/myGamePiece.maxMana) * (myGamePiece.mana); 
+      manaFill.style = "width:"+manaPercentage+"px;" 
+    }
     function GoToLobby() {
       if (playerList.length == 0) {
         socket.emit('lastPlayerLeft');
@@ -137,7 +142,15 @@
       window.location.href = 'index.html';
     }
     // NEW CODE END
-
+    function waterShot(){
+      console.log("shooting")
+      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      socket.emit('waterShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterShot'});
+      // let waterAbility = new WaterShot(socket.id);
+      // projectiles.push(waterAbility)
+    }
 
     function sendMessage(){
       console.log("hi");
@@ -254,7 +267,7 @@
       socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'bread'});
     }
     function updateGameArea() {
-         myGameArea.clear();
+          myGameArea.clear();
          handleBackground();
          HandleProjectiles();
          for (i = 0; i < playerList.length; i += 1) {
@@ -285,24 +298,40 @@
            // moving down
            myGamePiece.Yspeed= -1 * movementspeed; 
           }
+
+          if (myGamePiece.attackTick >= myGamePiece.attackDelay){
           if (myGameArea.keys && myGameArea.keys[32])
           {
-            if (shootCharge >= 25){
+            if (myGamePiece.mana >= 100){
             shoot();
-            shootCharge = 0;
+            myGamePiece.mana = myGamePiece.mana - 100;
+            myGamePiece.attackTick = 0;
             }
             // shoot bread spacebar
           }
-          if (myGameArea.keys && myGameArea.keys[16]){
-            if (shootCharge >= 25){
-            blast();
-            shootCharge = 0;
+          // if (myGameArea.keys && myGameArea.keys[16]){
+          //   if (myGamePiece.mana >= 250){
+          //   blast();
+          //   myGamePiece.mana = myGamePiece - 250;
+          //   }
+          // }
+          if (myGameArea.keys && myGameArea.keys[90]){
+            //ability 
+            if (myGamePiece.mana >= 250){
+            waterShot();
+            myGamePiece.mana = myGamePiece.mana - 250;
+            myGamePiece.attackTick = 0
             }
           }
-          // shoot charge needs to be enforced by the server to avoid tampering with attack speed in the future updates.
-          if (shootCharge < 25){
-            shootCharge++;
+        }
+        else{
+          myGamePiece.attackTick++;
+        }
+          // Mana needs to be enforced by the server to avoid tampering with attack speed in the future updates. TODO
+          if (myGamePiece.mana < myGamePiece.maxMana){
+            myGamePiece.regenMana()
           }
+          updateManaBar();
          myGamePiece.newPos();
         socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
         }

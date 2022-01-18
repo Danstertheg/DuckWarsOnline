@@ -21,7 +21,7 @@ class WaterBlast{
     draw() {
         ctx = myGameArea.context;
        // console.log('attempting to draw waterblast...')
-        if (this.currentFrame < 51){
+        if (this.currentFrame < 25){
             waterBlast.src = 'img/WaterBlast/right/frame_' + String(this.currentFrame) + "_delay-0.04s.gif";
             // console.log(waterBlast.src)
             this.currentFrame = this.currentFrame + 1;

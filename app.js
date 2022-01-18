@@ -243,7 +243,9 @@ function calculateProjectilesPath(){
 }
 
 function runGame(){
+  if (playerList.length >= 1){
 calculateProjectilesPath();
+  }
 }
 
 setInterval(runGame,20)
