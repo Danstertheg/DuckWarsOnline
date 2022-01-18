@@ -1,0 +1,197 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body { /*a flex container for the header, main things, footer (3 things)*/
+    font-family: Arial;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: darkcyan;
+}
+
+#nameInputOverlay {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    justify-content: center;
+    background-color: rgb(67, 116, 128);
+}
+.overlayLogo {
+    width: 303px;
+    height: 203px;
+    padding: 0;
+    margin: 0;
+}
+#usernameInput {
+    margin: 60px 0 30px;
+    padding:5px 5px 5px;
+    text-align: center;
+    font-size: 32px;
+    border-color: rgb(178, 241, 255);
+    border-radius: 10px;
+    height: 60px;
+    width: 500px;
+}
+#enterLobbyIMG {
+    cursor: pointer;
+    width: 220px;
+    height: 50px;
+    border-radius: 30px;
+    margin-bottom: 60px;
+}
+textarea:focus, input:focus{
+    outline: none;
+}
+
+/* Header: ------------------------------------------------------------*/
+.header {
+    flex: 0.9;
+    padding: 10px 0 10px;
+}
+.header img {
+    width: 121px;
+    height: 81px;
+    padding: 0;
+    margin: 0;
+}
+#logout {
+    color:rgb(0, 0, 119);
+    cursor:pointer;
+    font-weight: bold;
+    position:absolute;
+    top: 10px;
+    right: 20px;
+    text-decoration: underline;
+}
+
+/* MAIN CONTENT: ------------------------------------------------------------*/
+.mainFlexContainer { /*a flex container for the 2 things: chat and game match list*/
+    flex:6;
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 75vh;
+}
+.flexItem { /*a flex container for whatever each of the 2 hold*/
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 25px;
+}
+.boxTitle {
+    flex: 0.5;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    padding: 10px 0 10px;
+    
+    display: flex; /*flex here too just so that align-items center below works*/
+    align-items: center;
+}
+
+/* Games List: ------------------------------------------------------------*/
+.gamesList {
+    flex: 2;
+    background-color: #9fda78;
+    margin: 15px 30px 15px;
+}
+#matchContainer {
+    flex: 6;
+    width: 90%;
+    margin-bottom: 30px;
+    overflow-y: auto;
+}
+/* Scrollbar just in case it is needed: */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 10px 10px rgb(177, 205, 214);
+    border: solid 2px transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 10px 10px rgb(14, 45, 75);
+    border: solid 2px transparent;
+}
+.match {
+    background-color: rgb(131, 166, 182);
+    display: flex;
+    flex-direction: row;
+    padding: 10px 23px 10px;
+    border-radius: 15px;
+    margin: 0 8px 10px;
+}
+.gameID {
+    flex: 9;
+    display: flex;
+    align-items: center;
+    font-size: 23px;
+    font-weight: bold;
+}
+.gameID p {
+    font-size: 20px;
+    padding-left: 20px;
+    font-weight: normal;
+}
+.joinGame {
+    flex: 1;
+    width: 89px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Chat: ------------------------------------------------------------*/
+.chat {
+    flex: 3;
+    background-color: rgb(71, 87, 158);
+    margin: 5px 30px 5px;
+}
+#chatConversationContainer {
+    flex: 5.5;
+    width: 90%;
+    background-color:#93cef5;
+    border-radius: 8px 8px 0 0;
+    padding: 5px 0 5px;
+    overflow-y: auto;
+}
+#chatInput {
+    width: 90%;
+    height: 10%;
+    flex: 0.75;
+    display:flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+#chatMessageField {
+    flex: 9;
+    font-size: 22px;
+    padding: 5px 10px 5px;
+}
+#sendMessage {
+    flex: 0.5;
+    vertical-align: bottom;
+    margin-left: 5px;
+    cursor: pointer;
+}
+.message {
+    padding: 5px 10px 5px;
+    font-size: 18px;
+}
+
+/* Footer: ------------------------------------------------------------*/
+.footer {
+    flex: 0.25;
+    font-size: 15px;
+    padding: 10px 0 10px;
+    color: white;
+}

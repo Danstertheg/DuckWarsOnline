@@ -1,319 +1,44 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Duck Wars</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<link rel="stylesheet" href="css/index.css">
-  </head>
-<body style = "background-color: darkcyan;">
-<!-- <h1 class = "titleText">Duck Wars</h1> -->
-<p style = "text-align: center;">
-  <img src="img/logo.png" style = "width:80px;height:50px;">
-</p>
-
-<!-- <div class = "playerInfo">
-  <div class = "lifeContainer">
-    <div class = "lifeBar" style = "overflow:hidden;width:300px;height:100px;">
-    <img src="img//healthbar/health_5.png" style = "width:100%;height:100%;">
+<head>
+    <title>Duck Wars | Lobby</title>
+    <link rel="stylesheet" href="css/lobby.css">
+</head>
+<body>
+    <div id="nameInputOverlay">
+        <img class="overlayLogo" src="img/logo.png">
+        <input type="text" placeholder="Enter a username..." id="usernameInput">
+        <img id="enterLobbyIMG" src="img/enterLobby.png">
     </div>
-    <div id = "specialBar">
-      <div id = "specialFill">
-  
-      </div>
-    </div>
-    <img src = "img/animations/danky/Danky_l_idle1.png" class = "life">
-    <img src = "img/animations/danky/Danky_l_idle1.png" class = "life">
-    <img src = "img/animations/danky/Danky_l_idle1.png" class = "life">
-  </div>
-</div> -->
 
-<div id = "canvasHolder"></div>
-<template id = "playerTemplate">
-  <div class = "playerStatus">
+    <div id="logout">Log Out</div>
+    <div class="header"><img src="img/logo.png"></div>
+    <div class="mainFlexContainer">
+        <div class="flexItem gamesList">
+            <div class="boxTitle">Select Game</div>
+            <div id="matchContainer">
+                <div class="match">
+                    <div class="gameID">PASTA-BOIS
+                        <p id="playerCount"> _ players</p>
+                    </div>
+                    <img class="joinGame" src="img/join.png" id="onlyGameForNow">
+                </div>
+            </div>
+        </div>
 
-    <span class = "statusText">Health: </span> 
-     <div class = "lifeBar" style = "overflow:hidden;width:300px;height:100px;">
-     <img id = "healthBarImage" src="img//healthbar/health_5.png" style = "width:100%;height:100%;">
-     </div>
- 
-    <span class = "statusText">Charge: </span>
-     <div id = "specialBar">
-       <div id = "specialFill"></div>
-     </div>
- 
-   <span class = "statusText">Lives: </span> 
-   <div class = "LifeHolder" id = "lifeHolder">    
-   </div> 
- 
-   </div>
-</template>
-<div id ="playerInfo" class = "playerInfo">
-  
-</div>
-<!----
-<p style = "text-align: center;">
-  <input id = "message" type="text" style = "width:800px;" placeholder = "send a message here... (Not yet supported)...">
-  <button onclick = "sendMessage()" class = "btn-primary" style = "width:200px;">Send</button>
-</p>       
--->  
-<h3 style = "text-align: center;">Enter Name to Join Game</h3>
-<p class = "joinForm">
-  <label for = "playerName">Enter Name :</label>
-  <input type = "text" name = "playerName" id = "playerName" placeholder = "Enter username...">
-  <button onclick = "joinGame()" class = "btn-primary">Join Game</button>
-</p>
-  <br>
-<div class = "startBtn">
-  <button class = "stbtn btn-primary" onclick = "startGame()">Start Match (Starts game for all in lobby), join first</button>        
-</div>
-    <div id ="playerLobby">
-      <h3>Players In Game</h3>
-      <p id = "playerCount"></p>
-      <div id = "playerList"></div>
+        <div class="flexItem chat">
+            <div class="boxTitle">Chat</div>
+            <div id="chatConversationContainer">
+                
+            </div>
+            <div id="chatInput">
+                <input type="text" placeholder="Chat with fellow ducks..." id="chatMessageField">
+                <img id="sendMessage" src="img/send-button.png">
+            </div>
+        </div>
     </div>
-    <p class = "gameInstructions">Make sure the gamearea has focus, and use the arrow keys to move, spacebar to shoot. Note: all players must be in lobby before starting</p>
+    <div class="footer">LakeDeep Games © 2006</div>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/Player.js"></script>
-    <script src='js/BreadProjectile.js'></script>
-    <script src='js/WaterBlast.js'></script>
-    <script src='js/WaterShot.js'></script>
-    <script>
-    var socket = io();
-    //var shootCharge = 0;
-    var myGamePiece;
-   // playerId is self position in playerList 
-    var playerId;
-   // playerCap is the quantity of players allowed in playerList
-    var playerCap = 3;
-    // playerList holds the list of player objects shown in the canvas
-    var playerList = [];
-    // length of playerList
-    var playerCount;
-    // list of all projectiles on the scene for client to keep track of (this gets updated by the server.)
-    var projectiles = [];
-    // width of canvas
-    // var canvasWidth = window.innerWidth * 0.9;
-    var canvasWidth = 1000;
-    //height of canvas
-    // var canvasHeight = window.innerHeight * 0.9;
-    var canvasHeight = 600;
-    // different colors player could be, instead here we should replace with ducks
-    //var colors = ["blue","red","green","orange","black","navy"]
-    var gameStarted = false;
-    var gameEnded = false;
-    var spectateMode = false;
-    var loadedPlayerInfo = false;
-    function checkSelf(id){
-      if (id == socket.id){
-        return true;
-      }
-      else{
-        return false;
-      }
-    }
-    function sendMessage(){
-      console.log("hi");
-      let message = document.getElementById("message").value;
-      socket.emit('message',{msg:message,id:socket.id});
-    }
-    const background = new Image();
-        background.src = 'img/lake.png';
-        function handleBackground() {
-          ctx = myGameArea.context;
-          ctx.drawImage(background, 0, 0, canvasWidth, canvasHeight);
-        }
-    function findPlayerInList(id){
-     for (x in playerList){
-       if (playerList[x].id == String(id) ){
-         return Number(x);
-       }
-     }
-     return null
-    }
-    function joinGame(){
-      if (playerId == null)
-      {
-        playerId = socket.id;
-        socket.emit('playerJoined',{playerName:document.getElementById("playerName").value,id:playerId});
-      }
-    }
-    function updateManaBar(){
-      let manaFill = document.getElementById("specialFill");
-      let mana = myGamePiece.mana;
-      let manaPercentage = (350/myGamePiece.maxMana) * (myGamePiece.mana); 
-      manaFill.style = "width:"+manaPercentage+"px;" 
-    }
-    function createLobby(){
-      myGameArea.create();
-    }
-    function startGame() {
-      if (gameStarted == false){
-        socket.emit('startGame');
-        gameStarted = true;
-      }
-      else {
-        //TODO: show toast image (notification) that the match has already started. 
-        console.log("game already started.");
-      }
-    }
-    
-    var myGameArea = {
-        canvas : document.createElement("canvas"),
-        create : function() {
-            this.canvas.width = canvasWidth;
-            this.canvas.height = canvasHeight;
-            this.context = this.canvas.getContext("2d");
-            let game = document.getElementById("canvasHolder");
-            // change the use of innerhtml possibly in the future.
-            game.appendChild(this.canvas);
-            //document.body.insertBefore(this.canvas, document.body.childNodes[3]);
-        },
-        start : function() {
-            this.frameNo = 0;
-            this.interval = setInterval(updateGameArea, 20);
-            window.addEventListener('keydown', function (e) {
-                e.preventDefault();
-                myGameArea.keys = (myGameArea.keys || []);
-                myGameArea.keys[e.keyCode] = (e.type == "keydown");
-            })
-            window.addEventListener('keyup', function (e) {
-                myGameArea.keys[e.keyCode] = (e.type == "keydown");
-            })
-        },
-        stop : function() {
-            clearInterval(this.interval);
-        },    
-        clear : function() {
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-    }
-
-    function HandleProjectiles() {
-      console.log("handle projectiles");
-      for (j in playerList){
-        for (i in projectiles){
-          projectiles[i].update();
-          projectiles[i].draw();
-          let dx = projectiles[i].x - playerList[j].x;
-          let dy = projectiles[i].y - playerList[j].y;
-          let distance = Math.sqrt(dx*dx + dy*dy);
-            // splice it if it goes off-bounds:
-            if (projectiles[i].x < 0 - projectiles[i].radius * 2 || projectiles[i].x > canvasWidth + projectiles[i].radius * 2) {
-              projectiles.splice(i, 1);
-                i--;
-            }
-            
-            // // checking for collision between current projectile and its target:
-            else if (distance < projectiles[i].radius + 25) {
-                 if (projectiles[i].damageCounted == false && String(playerList[j].id) !== String(projectiles[i].id)) {
-            //         // play hit sounds
-            console.log ("projectiles with id " + String(projectiles[i].id) + " has just hit player with id " + String (playerList[j].id));
-                      console.log("hit");
-            //         projectiles[i].target.health -= projectiles[i].damage;
-            //         projectiles[i].damageCounted = true;
-                     projectiles.splice(i, 1);
-            //         i--;
-                 }
-             }
-            }
-          }
-          }
-
-    function blast(){
-      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
-      let Y = myGamePiece.y; 
-      socket.emit('waterBlast',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterBlast'});
-    }
-    function shoot(){
-      console.log("shooting")
-      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
-      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
-      let Y = myGamePiece.y; 
-      socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'bread'});
-    }
-    function waterShot(){
-      console.log("shooting")
-      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
-      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
-      let Y = myGamePiece.y; 
-      socket.emit('waterShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterShot'});
-      // let waterAbility = new WaterShot(socket.id);
-      // projectiles.push(waterAbility)
-    }
-    function updateGameArea() {
-         myGameArea.clear();
-         handleBackground();
-         HandleProjectiles();
-         for (i = 0; i < playerList.length; i += 1) {
-          playerList[i].update();
-          }
-         if (spectateMode == false){
-           // if the person is a player, not a spectator. then proceed to collect controller input and send. 
-         myGamePiece = playerList[findPlayerInList(socket.id)];
-         
-        let movementspeed = 6;
-         myGamePiece.Xspeed = 0;
-         myGamePiece.Yspeed = 0;
-         if (myGameArea.keys && myGameArea.keys[37]) {
-           // moving to the left
-           myGamePiece.direction = 'l';
-           myGamePiece.Xspeed = -1 * movementspeed; 
-          }
-         if (myGameArea.keys && myGameArea.keys[39]) {
-           // moving to the right
-           myGamePiece.direction = 'r';
-           myGamePiece.Xspeed = 1 * movementspeed; 
-          }
-         if (myGameArea.keys && myGameArea.keys[38]) {
-           // moving up
-           myGamePiece.Yspeed = 1 * movementspeed;
-           }
-         if (myGameArea.keys && myGameArea.keys[40]) {
-           // moving down
-           myGamePiece.Yspeed= -1 * movementspeed; 
-          }
-
-          if (myGamePiece.attackTick >= myGamePiece.attackDelay){
-          if (myGameArea.keys && myGameArea.keys[32])
-          {
-            if (myGamePiece.mana >= 50){
-            shoot();
-            myGamePiece.mana = myGamePiece.mana - 50;
-            myGamePiece.attackTick = 0;
-            }
-            // shoot bread spacebar
-          }
-          // if (myGameArea.keys && myGameArea.keys[16]){
-          //   if (myGamePiece.mana >= 250){
-          //   blast();
-          //   myGamePiece.mana = myGamePiece - 250;
-          //   }
-          // }
-          if (myGameArea.keys && myGameArea.keys[90]){
-            //ability 
-            if (myGamePiece.mana >= 250){
-            waterShot();
-            myGamePiece.mana = myGamePiece.mana - 250;
-            myGamePiece.attackTick = 0
-            }
-          }
-        }
-        else{
-          myGamePiece.attackTick++;
-        }
-          // Mana needs to be enforced by the server to avoid tampering with attack speed in the future updates. TODO
-          if (myGamePiece.mana < myGamePiece.maxMana){
-            myGamePiece.regenMana()
-          }
-          updateManaBar();
-         myGamePiece.newPos();
-        socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
-        }
-    }
-        createLobby();
-      </script>
-      <!-- !!!IMPORTANT: Client.JS depends on other javascript code, this must be last.-->
-      <script src="js/Client.js"></script>
+    <script src="js/lobby.js"></script>
 </body>
-
-</html>
