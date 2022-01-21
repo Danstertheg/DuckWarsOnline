@@ -13,6 +13,8 @@ class WaterShot{
         this.speed = 15;
         this.direction = this.user.direction;
         this.damageCounted = false;
+        // how many game ticks per animation frame (eg. setInterval() ... 1 tick = 20ms)
+        this.animationTick = 5;
     }
     update() {
         if (this.direction == 'l')
@@ -24,16 +26,25 @@ class WaterShot{
     }
     draw() {
         ctx = myGameArea.context;
-        if (this.currentFrame < 10){
+        if (this.currentFrame < 50){
+            console.log("this direction " + this.direction)
             waterShotImage.src = './img/WaterShot/' + String(this.direction) + '/frame_' + String(this.currentFrame) + '_delay-0.04s.gif';
-          //  console.log(waterShot.src)
         ctx.drawImage(waterShotImage, this.x + 11, this.y + 11, this.radius * 2.5, this.radius * 2.5);
-        this.currentFrame = this.currentFrame + 1;
         }
         else{
             this.currentFrame = 3;
             ctx.drawImage(waterShotImage, this.x + 11, this.y + 11, this.radius * 2.5, this.radius * 2.5);
-            this.currentFrame = this.currentFrame + 1;
         }
+        // tickCount is a global variable in game.html
+        if (tickCount % this.animationTick == 0 ){
+            this.currentFrame++;
+            console.log("changing Frame");
+        }
+
+
+
+
+
+
     }
 }
