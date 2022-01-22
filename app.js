@@ -10,6 +10,8 @@ const io = new Server(server);
 var leaderId;
 var playerList = [];
 var projectiles = [];
+// holds abilities that are not considered projectiles, such as shield, dash etc. 
+var abilities = [];
 var playerCount = 0;
 const roomSize = 4;
 var gameStarted = false;
@@ -131,11 +133,11 @@ io.on('connection', (socket) => {
         console.log(projectiles);
         io.emit('updateProjectiles', projectile);
       })
-      socket.on('waterBlast',(projectile)=> {
-        console.log(projectile['id'] + " has waterBlasted.")
-        projectiles.push(projectile);
-        console.log(projectiles);
-        io.emit('updateProjectiles', projectile);
+      socket.on('waterDash',(dashProperties)=> {
+        console.log(dashProperties['id'] + " has dashed.")
+        abilities.push(dashProperties);
+        console.log(abilities);
+        io.emit('updateAbilities', dashProperties);
       })
       socket.on('waterShot',(projectile) =>{
         console.log(projectile['id'] + " has waterBlasted.")

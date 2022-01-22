@@ -40,10 +40,7 @@ socket.on('updatePlayers', function(newPlayerList) {
   });
   socket.on('updateProjectiles',function(projectile){
     let type = projectile['type'];
-      if ( type == 'waterBlast'){
-        tmpProjectile = new WaterBlast(String(projectile['id']));
-      }
-      else if (type == 'waterShot')
+     if (type == 'waterShot')
       {
         tmpProjectile = new WaterShot(String(projectile['id']));
       }
@@ -56,6 +53,28 @@ socket.on('updatePlayers', function(newPlayerList) {
     //document.getElementById("playerList").innerText = playersInLobby;
     //document.getElementById("playerCount").innerText = "Number of players: " + String(playerList.length);
   })
+  //// new ability code
+  socket.on('updateAbilities',function(ability){
+    let type = ability['type'];
+    console.log('received ability' + type + ' from the server');
+    let id = ability['id'];
+    abilityFilter(id,type);
+  })
+function abilityFilter(id,type){
+  switch(type) {
+    case 'waterDash':
+      console.log('Water Dash received by server ' + id);
+      abilities.push(new WaterDash(id))
+      break;
+    case 'waterShield':
+      console.log('Water Shield')
+      // code block
+      break;
+    default:
+      // code block
+  }
+}
+  ///
   socket.on('playerHit',function(projectile){
     console.log("hit received.")
     let id = projectile['id'];

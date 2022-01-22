@@ -76,11 +76,17 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/Player.js"></script>
     <script src='js/BreadProjectile.js'></script>
-    <script src='js/WaterBlast.js'></script>
+    <script src='js/WaterDash.js'></script>
+    <script src='js/WaterShield.js'></script>
     <script src='js/WaterShot.js'></script>
     <script>
     var socket = io();
     var shootCharge = 0;
+
+    // The game will run off ticks. each tick is 20ms based on the set interval function the client and server both run on. 
+    // This variable will be used to animate the projectiles and in the future TODO: also the players and obstacles (players currently have their own var to keep track.)
+    var tickCount = 0;
+
     var myGamePiece;
    // playerId is self position in playerList 
     var playerId;
@@ -104,6 +110,9 @@
     var gameEnded = false;
     var spectateMode = false;
     var loadedPlayerInfo = false;
+    // keeps track of non projectile abilities (shield, and dash currently.)
+    var abilities = [];
+
     function checkSelf(id){
       if (id == socket.id){
         return true;
@@ -149,18 +158,10 @@
       window.location.href = 'index.html';
     }
     // NEW CODE END
-    function waterShot(){
-      console.log("shooting")
-      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
-      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
-      let Y = myGamePiece.y; 
-      socket.emit('waterShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterShot'});
-      // let waterAbility = new WaterShot(socket.id);
-      // projectiles.push(waterAbility)
-    }
+
 
     function sendMessage(){
-      console.log("hi");
+     // console.log("hi");
       let message = document.getElementById("message").value;
       socket.emit('message',{msg:message,id:socket.id})
     }
@@ -231,7 +232,7 @@
     }
 
     function HandleProjectiles() {
-      console.log("handle projectiles")
+      //console.log("handle projectiles")
       for (j in playerList){
         for (i in projectiles){
           projectiles[i].update();
@@ -261,11 +262,16 @@
           }
           }
 
-    function blast(){
-      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
-      let Y = myGamePiece.y; 
-      socket.emit('waterBlast',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterBlast'})
-    }
+
+          function handleAbilities (){
+            for (i in abilities){
+              abilities[i].update();
+              abilities[i].draw();
+              if (abilities[i].duration == 0){
+                abilities.splice(i,1);
+              }
+            }
+          }
     function shoot(){
       console.log("shooting")
       // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
@@ -273,10 +279,31 @@
       let Y = myGamePiece.y; 
       socket.emit('playerShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'bread'});
     }
+    function Dash(){
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      //console.log('dashing sending to server')
+      socket.emit('waterDash',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterDash'});
+    }
+    function waterShot(){
+      console.log("shooting")
+      // x and y should be calculated server side in the future update to prevent tampering projectile path from clients.
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      socket.emit('waterShot',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,damageCounted:false,type:'waterShot'});
+      // let waterAbility = new WaterShot(socket.id);
+      // projectiles.push(waterAbility)
+    }
+    function waterShield(){
+      let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
+      let Y = myGamePiece.y; 
+      socket.emit('waterShield',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,type:'waterDash'})
+    }
     function updateGameArea() {
           myGameArea.clear();
          handleBackground();
          HandleProjectiles();
+         handleAbilities();
          for (i = 0; i < playerList.length; i += 1) {
           playerList[i].update();
           }
@@ -290,11 +317,13 @@
          if (myGameArea.keys && myGameArea.keys[37]) {
            // moving to the left
            myGamePiece.direction = 'l';
+          // console.log('moving left')
            myGamePiece.Xspeed = -1 * movementspeed; 
           }
          if (myGameArea.keys && myGameArea.keys[39]) {
            // moving to the right
            myGamePiece.direction = 'r';
+          // console.log('moving right')
            myGamePiece.Xspeed = 1 * movementspeed; 
           }
          if (myGameArea.keys && myGameArea.keys[38]) {
@@ -305,29 +334,36 @@
            // moving down
            myGamePiece.Yspeed= -1 * movementspeed; 
           }
-
+          // attack ticks should be checked by the server to ensure there is no player cheating by editing their game.html file.
           if (myGamePiece.attackTick >= myGamePiece.attackDelay){
+            // the player's attackTick is greater than or equal to the attackDelay. 
+            // This means the player can use an attack, attackTick is used to keep track of how many game ticks since last attack. and attackDelay is number of ticks per attack.
           if (myGameArea.keys && myGameArea.keys[32])
           {
             if (myGamePiece.mana >= 100){
+              // bread shot costs 100 mana
             shoot();
             myGamePiece.mana = myGamePiece.mana - 100;
             myGamePiece.attackTick = 0;
             }
             // shoot bread spacebar
           }
-          // if (myGameArea.keys && myGameArea.keys[16]){
-          //   if (myGamePiece.mana >= 250){
-          //   blast();
-          //   myGamePiece.mana = myGamePiece - 250;
-          //   }
-          // }
+           if (myGameArea.keys && myGameArea.keys[88]){
+             if (myGamePiece.mana >= 250){
+             Dash();
+             myGamePiece.mana = myGamePiece.mana - 250;
+             myGamePiece.attackTick = 0;
+             }
+             
+          }
           if (myGameArea.keys && myGameArea.keys[90]){
-            //ability 
+            // Water ability
             if (myGamePiece.mana >= 250){
+              // WaterShot ability costs 250 mana
             waterShot();
             myGamePiece.mana = myGamePiece.mana - 250;
-            myGamePiece.attackTick = 0
+            // They now have to wait till attackTick increases to attackDelay to use another attack again
+            myGamePiece.attackTick = 0;
             }
           }
         }
@@ -342,6 +378,13 @@
          myGamePiece.newPos();
         socket.emit('playerMovement',{id:socket.id,x:myGamePiece.x,y:myGamePiece.y,direction:myGamePiece.direction});
         }
+        else {
+          console.log("Specating the game")
+          // this means spectate mode is true, here do something special for specate mode players. 
+        }
+        // Keeps track of the number of ticks the game currently is on.
+        tickCount++;
+
     }
         createLobby()
       </script>
