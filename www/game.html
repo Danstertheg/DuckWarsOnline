@@ -117,16 +117,23 @@
     // NEW CODE START
     StartGameFromLobby();
     var username;
+    var skin;
+    var headItem;
+    var outfit;
 
     function StartGameFromLobby() {
       username = sessionStorage.getItem("username");
+      skin = sessionStorage.getItem("skin");
+      headItem = sessionStorage.getItem("headItem");
+      outfit = sessionStorage.getItem("outfit");
+
       console.log(username);
 
       // FOR joinGame() function:
       if (playerId == null)
       {
         playerId = socket.id;
-        socket.emit('playerJoined',{playerName:username,id:playerId});
+        socket.emit('playerJoined',{playerName:username,id:playerId, skin:skin, headItem:headItem, outfit:outfit});
       }
     }
     function updateManaBar(){

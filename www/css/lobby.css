@@ -14,6 +14,7 @@ body { /*a flex container for the header, main things, footer (3 things)*/
 }
 
 #nameInputOverlay {
+    z-index: 3;
     position: absolute;
     width: 100vw;
     height: 100vh;
@@ -61,6 +62,127 @@ textarea:focus, input:focus{
     padding: 0;
     margin: 0;
 }
+/*Style overlay:*/
+#styleOverlayButton {
+    position: absolute;
+    top: 10px;
+    left: 30px;
+    background-color: rgb(238, 238, 91);
+    padding: 5px 10px 5px;
+    border-radius: 15px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    justify-content: center;
+}
+#styleOverlayButton p {
+    font-weight: bold;
+}
+#styleOverlayButton img {
+    height: 60px;
+}
+#styleOverlay {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    background-color: rgb(93, 181, 216);
+    display: flex;
+    flex-direction: column;
+}
+.styleShopHeader {
+    flex: 1;
+    display: flex;
+    align-items: center;   
+}
+.styleShopHeader img {
+    height: 13vh;
+    margin-left: 6.5vw;
+}
+#exitShop {
+    height: 8vh;
+    right: 3vw;
+    top: 2.5vh;
+    cursor:pointer;
+    position: absolute;
+}
+.styleShopContent {
+    flex: 6;
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(93, 181, 216);
+}
+/*Left side (current style)*/
+.currentStyle {
+    color: white;
+    background-color: #41418e;
+    border-top-right-radius: 40px;
+    font-weight: bold;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    justify-content: center;
+}
+#styleShopUsername {
+    font-size: 25px;
+}
+/*Right side (shop cagetories and content)*/
+.styleShop {
+    flex: 3;
+    background-color: rgb(62, 158, 110);
+    display:flex;
+    flex-direction: column;
+}
+.styleCategoryBar {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: rgb(93, 181, 216);
+}
+.styleCategoryBar div {
+    border-radius: 40px 40px 0 0;
+    background-color: rgb(93, 181, 216);
+    cursor: pointer;
+    display: flex;
+    flex: 1;
+    align-items: center;    
+    justify-content: center;
+}
+.styleCategoryBar img {
+    height: 90%;
+}
+.styleItemPage {
+    flex: 7;
+    padding: 10px 0 10px;
+  /*  display: flex;
+    flex-direction: column;*/
+}
+.itemRow { /*for when we actually need multiple rows*/
+    display: flex;
+    flex-direction: row;
+    height: 160px;
+}
+/*a single style item:*/
+.styleItem {
+    cursor: pointer;
+    background-color:rgb(131, 178, 207);
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    justify-content: center;
+    width: 140px;
+    padding: 10px 20px 10px;
+    border-radius: 30px;
+    margin: 10px 0px 10px 30px;
+}
+.styleItem img {
+    height: 100px;
+    margin-bottom: 5px;
+}
+
 #logout {
     color:rgb(0, 0, 119);
     cursor:pointer;

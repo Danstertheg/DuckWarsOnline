@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
     socket.on('playerJoined', (playerInitObj) => {
         if (playerCount < roomSize){
         // if the player limit is not exceeded, let the player join
-          let playerSkin = skins[playerCount]
+         // let playerSkin = skins[playerCount] //OLDSTYLECODE
           let playerId = socket.id;
           let playerPositionY = Math.floor((Math.random() * 225) + 1);
           let playerPositionX = Math.floor((Math.random() * 225) + 1);
@@ -77,7 +77,9 @@ io.on('connection', (socket) => {
             x:playerPositionX,
             y:playerPositionY,
             name:playerInitObj["playerName"],
-            skin:playerSkin,
+            skin:playerInitObj["skin"],//playerSkin, OLDSTYLECODE
+            headItem: playerInitObj["headItem"],
+            outfit: playerInitObj["outfit"],
             direction:'l',
             health:5,
             lives:3

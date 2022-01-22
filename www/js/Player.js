@@ -1,13 +1,25 @@
-function Player(width, height, color, x, y, name,id,skin) {
-    if (skin == "danky"){
-      this.skin = 'img/animations/danky/Danky';
+const e = require("express");
+
+function Player(width, height, color, x, y, name,id,skin, headItem, outfit) {
+      if (outfit == "noneOutfit")
+        this.bodyIMG = 'img/animations/' + skin + '/' + skin + '_';
+      else
+        this.bodyIMG = 'img/clothingItems/' + skin + '/outfits/' + outfit + '/';
+
+      if (headItem != "noneHead") {
+        this.headItemIMG = 'img/clothingItems/' + skin + '/headItems/' + headItem + '/'; 
+        this.headItemXOffset = 0;
+      }
+
+  /* if (skin == "danky"){
+      this.skin = 'img/animations/danky/danky';
     }
     else if(skin == "oats"){
-      this.skin = 'img/animations/oats/Oats';
+      this.skin = 'img/animations/oats/oats';
     }
     else{
       this.skin = 'img/animations/mrgoose/mrgoose';
-    }
+    }*/
       // starts at frame 1 for simplicity
       this.frame = 1;
       this.mana = 1000;
@@ -29,6 +41,7 @@ function Player(width, height, color, x, y, name,id,skin) {
       this.y = y;
       this.health = 5;
       this.animation = new Image();
+      this.headItemAnimation = new Image(); // new
       this.healthBar = new Image();
       this.lives = 3;
       this.takeDamage = function (){
@@ -51,18 +64,62 @@ function Player(width, height, color, x, y, name,id,skin) {
           ctx = myGameArea.context;
           ctx.save();
           ctx.translate(this.x, this.y);
-          this.animation.src = this.skin + '_' + this.direction + '_idle' + String(this.frame) + ".png";
           this.healthBar.src = 'img/healthbar/health_' + String(this.health) + '.png'
           ////////////drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
           ctx.drawImage(this.healthBar,0,0,200,100,0,-20,100,50)
-          ctx.drawImage(this.animation,0,0,200,200,0,0,75,75)
+
+
+          // NEW STYLE CODE START:
+
+          // 1. drawing base (either skin or outfit):=======================================
+          this.animation.src = this.bodyIMG + this.direction + '_idle' + String(this.frame) + ".png";
+          ctx.drawImage(this.animation,0,0,200,200,0,0,75,75);
+          //this.animation.src = this.skin + '_' + this.direction + '_idle' + String(this.frame) + ".png"; OLDSTYLECODE
+
+          // 2. drawing head item (if any):=======================================
+          if (headItem != "noneHead") {
+            this.headItemAnimation.src = this.headItemIMG + this.direction + '.png';
+
+            var xDirectionFactor = (this.direction == 'l') ? 1 : -1;
+
+            if (skin == "mrgoose") 
+              ctx.drawImage(this.headItemAnimation, 0,0,200,200,0,0 + this.headItemXOffset,75,75);
+            else if (skin == "oats")
+              ctx.drawImage(this.headItemAnimation, 0,0,200,200,0 + this.headItemXOffset * xDirectionFactor * -1,0 -6,75,75);
+            else
+              ctx.drawImage(this.headItemAnimation, 0,0,200,200,0 + this.headItemXOffset * xDirectionFactor,0,75,75);
+          }
+
+          // NEW STYLE CODE END. thanks for coming, mate
+          
+
           ctx.fillText(name,25,75);
           ctx.restore();
-          if (this.frame == 1){
+          
+          // Switching frames:
+          this.frameCount++;
+          if (this.frameCount % this.frameCountMax == 0) {
+            if (this.frame == 1) {
+              this.frame = 2;
+              this.headItemXOffset = -2;
+            } else if (this.frame == 2) {
+              this.frame = 1;
+              this.headItemXOffset = 0;
+            }
+          }
+           // this.frame = (this.frame == 1) ? 2 : 1;
+
+          // Old code:
+         /* if (this.frame == 1){
             this.frameCount++;
             if (this.frameCount == this.frameCountMax){
               this.frame = 2;
               this.frameCount = 0;
+
+              if (this.direction == 'l')
+                this.headItemXOffset = (this.headItemXOffset != -2) ? -2 : 0;
+              else
+                this.headItemXOffset = (this.headItemXOffset != 1) ? 1 : 0;
             }
           
           }
@@ -71,9 +128,14 @@ function Player(width, height, color, x, y, name,id,skin) {
             if (this.frameCount == this.frameCountMax){
               this.frame = 1;
               this.frameCount = 0;
+              
+              if (this.direction == 'l')
+                this.headItemXOffset = (this.headItemXOffset != -2) ? -2 : 0;
+              else
+                this.headItemXOffset = (this.headItemXOffset != 2) ? 2 : 0;
             }
             
-          }
+          }*/
       }
       this.showMessage = function(msg){
         ctx = myGameArea.context;

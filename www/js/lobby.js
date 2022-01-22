@@ -29,10 +29,13 @@ document.addEventListener('keypress', function(e) {
 function JoinLobby() {
     username = usernameField.value;
     chatMessageField.placeholder = "Welcome " + username + "! Chat with other players...";
+    document.getElementById("styleShopUsername").innerHTML = username; // for item shop!
     fade(nameInputOverlay);
     fadedAway = true;
 
     socket.emit('playerJoinedLobby', {newPlayer:username, id:socket.id});
+
+    //document.getElementById("logout").style.display = 'block';
 }
 
 // FADING FUNCTION: (Reduce opacity and then display: none)
@@ -112,6 +115,8 @@ logOutDiv.addEventListener('click', function() {
     nameInputOverlay.style.opacity = "1";
     fadedAway = false;
     chatConversationContainer.innerHTML += "<div class='message'>- Someone flew away -</div>";
+
+    //document.getElementById("logout").style.display = 'none';
 });
 
 // IF COMING BACK FROM GAME:
@@ -119,7 +124,10 @@ if (sessionStorage.getItem("username")) {
     username = sessionStorage.getItem("username");
     nameInputOverlay.style.display = "none";
     fadedAway = true;
+
+    //document.getElementById("logout").style.display = 'block';
     
+    document.getElementById("styleShopUsername").innerHTML = username; // for item shop!
     chatMessageField.placeholder = "Welcome " + username + "! Chat with other players...";
     chatConversationContainer.innerHTML += "<div class='message'><strong>- " + username + "</strong> came back from a match -</div>";
 }

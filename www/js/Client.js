@@ -5,7 +5,9 @@ socket.on('updatePlayers', function(newPlayerList) {
     playersInLobby = "";
     for (x in newPlayerList){
       player = newPlayerList[x];
-      tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"],player["skin"]);
+
+      // NEW STYLE CODE (just line below)
+      tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"],player["skin"], player["headItem"], player["outfit"]);
       tmpList.push(tmpPlayer);
       playersInLobby += player["name"] + ","
     }
@@ -22,7 +24,7 @@ socket.on('updatePlayers', function(newPlayerList) {
        let lives = document.getElementById("lifeHolder");
        for (i = 0; i < 3; i++){
         let life = document.createElement('img');
-        life.src = myGamePiece.skin + '_l_idle1.png';
+        life.src = myGamePiece.bodyIMG + 'l_idle1.png';
         life.classList.add('life');
         lives.appendChild(life);
        }
