@@ -30,6 +30,29 @@ class PlayerLobby{
     startGame(){
         console.log("starting lobby game. send to all players in the lobby list")
     }
+    addPlayer(player){
+        let alreadyAdded = this.checkPlayerInList(player);
+        if (alreadyAdded == false){
+            console.log("player is not yet in lobby, adding them to lobby.")
+            if (this.playerCount <= this.roomSize){
+            this.playerList.push(player)
+            this.playerCount++;
+            }
+            else{
+            // spectate mode possibly?
+            }
+        }
+        else{
+            console.log("player is already in this lobby, multilog attempt")
+        }
+    }
+    checkPlayerInList(player){
+        // returns true if player is in list, false otherwise
+        if (!this.playerList.some(item => item.id == player['id'])){
+            return false
+        }
+        else return true
+    }
     update(){
         /// loop through all players
         for (i = 0; i < this.playerCount; i++ ){

@@ -30,6 +30,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server, Socket } = require("socket.io");
+const { join } = require('path');
 const io = new Server(server);
 // all these vars will be needed in the future when creating a playerLobby class. 
 // leader id is the socket connection id of the lobby leader. so that only this character can start the match and select game mode in the future.
@@ -66,6 +67,38 @@ function findPlayerInList(id){
     lobbyCount++;
     // perhaps remove this in the future so that only refresh shows new lobby (could be unstable if many people are creating lobbies to have multiple new ones appear in the list simulatenously)
    // io.emit("addLobby",{})
+   });
+   socket.on('requestJoin',(joinReq) =>{
+    /// player related variables
+    let playerId = joinReq["pId"];
+    let playerPositionX = Math.floor((Math.random() * 225) + 1);
+    let playerPositionY = Math.floor((Math.random() * 225) + 1);
+    let playerName = joinReq["playerName"];
+    let playerSkin = joinReq["skin"];
+    let playerHeadItem = joinReq["headItem"]
+    let playerOutfit = joinReq["outfit"];
+    // Create player 
+    let playerReq = new Player(playerId,playerPositionX,playerPositionY,playerName,playerSkin,playerHeadItem,playerOutfit);
+    
+    
+    let id = joinReq['lId'];
+    let passAttempt = joinReq['password'];
+    let lobbyRequested = table.search(id);
+
+
+
+    if (lobbyRequested['password'] == passAttempt){
+      lobbyRequested.addPlayer(playerReq);
+      // successful entry to the lobby
+    }
+    else if (lobbyRequested['password'] == ''){
+      lobbyRequested.addPlayer(playerReq)
+      // lobby did not require password -> successful entry anyways
+    }
+    else{
+      // unsuccessful entry, handle error back to user here 
+      console.log(socket.id + " has failed to enter the lobby: " + lobbyRequested['lobbName'])
+    }
    });
  //console.log("hi " + socket.id)
 });

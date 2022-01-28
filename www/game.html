@@ -82,6 +82,8 @@
     <script src='js/Animator.js'></script>
     <script>
       /// test for water reflect, if this works it will be used in future for all other animations
+
+      ////////////////////////// modularize this code later
       var animation = []
       for (i = 0; i < 51; i ++){
             animation.push(new Image());
@@ -92,6 +94,9 @@
         // end of test code
     var assets = ['WaterDash','WaterReflect','WaterShot'];
     var animationFrames = new Animator(assets)
+    /////////////////////////////////////////////////////////////////////////////
+
+
     var socket = io();
     var shootCharge = 0;
 
@@ -141,7 +146,7 @@
     var skin;
     var headItem;
     var outfit;
-
+    //// REMOVE THIS ONCE LOBBIES ARE IMPLEMENTED ::: CODE 1
     function StartGameFromLobby() {
       username = sessionStorage.getItem("username");
       skin = sessionStorage.getItem("skin");
@@ -157,6 +162,7 @@
         socket.emit('playerJoined',{playerName:username,id:playerId, skin:skin, headItem:headItem, outfit:outfit});
       }
     }
+    /// END
     function updateManaBar(){
       let manaFill = document.getElementById("specialFill");
       let mana = myGamePiece.mana;

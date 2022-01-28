@@ -1,6 +1,6 @@
 //const e = require("express");
 
-function Player(width, height, color, x, y, name,id,skin, headItem, outfit) {
+function Player(id, x, y, name,skin, headItem, outfit) {
       if (outfit == "noneOutfit")
         this.bodyIMG = 'img/animations/' + skin + '/' + skin + '_';
       else
@@ -11,15 +11,7 @@ function Player(width, height, color, x, y, name,id,skin, headItem, outfit) {
         this.headItemXOffset = 0;
       }
 
-  /* if (skin == "danky"){
-      this.skin = 'img/animations/danky/danky';
-    }
-    else if(skin == "oats"){
-      this.skin = 'img/animations/oats/oats';
-    }
-    else{
-      this.skin = 'img/animations/mrgoose/mrgoose';
-    }*/
+
       // starts at frame 1 for simplicity
       this.frame = 1;
       this.mana = 1000;
@@ -34,8 +26,8 @@ function Player(width, height, color, x, y, name,id,skin, headItem, outfit) {
       this.direction = 'l';
       this.playerName = name;
       this.id = id;
-      this.width = width;
-      this.height = height;
+      this.width = 30;
+      this.height = 30;
       this.speed = 0;
       this.x = x;
       this.y = y;

@@ -23,6 +23,7 @@ class HashTable {
   
     search(key) {
        const hash = this.calculateHash(key);
+       console.log("searching for lobby with id " + key)
        if (this.values.hasOwnProperty(hash) && this.values[hash].hasOwnProperty(key)) {
          return this.values[hash][key];
        } else {

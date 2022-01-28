@@ -28,6 +28,7 @@ document.addEventListener('keypress', function(e) {
 });
 function JoinWorld() {
     username = usernameField.value;
+    sessionStorage.setItem("username", username);
     chatMessageField.placeholder = "Welcome " + username + "! Chat with other players...";
     document.getElementById("styleShopUsername").innerHTML = username; // for item shop!
     fade(nameInputOverlay);
@@ -57,7 +58,7 @@ function createLobby(){
     if (lobbPassword == ''){
         lobbPassword = '';
     }
-    socket.emit('createLobby',{name:lobbPassword,password:lobbName})
+    socket.emit('createLobby',{name:lobbName,password:lobbPassword})
 }
 socket.on('updateLobbyList',function(list){
     let lobbyList = list['values'];
@@ -85,6 +86,17 @@ socket.on('updateLobbyList',function(list){
             matchJoinBtn.onclick = function(){
                 //When someone clicks join button, add their player onto the lobby with lobbyId clicked.
                 console.log(lobby["lobbyId"])
+                /// Player related variables
+                username = sessionStorage.getItem("username");
+                skin = sessionStorage.getItem("skin");
+                headItem = sessionStorage.getItem("headItem");
+                outfit = sessionStorage.getItem("outfit");
+                playerId = socket.id;
+                console.log(username);
+
+                /// add empty password check here, "if the user forgot to enter a password with a lobby that requires one."
+                /// check password size before sending also, just to reduce errors server has to handle
+                socket.emit("requestJoin",{pId:playerId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lobby["lobbyId"],password:lobby["password"]})
             }
             matchJoinBtn.classList.add("joinGame")
             matchJoinBtn.src = "../img/join.png";

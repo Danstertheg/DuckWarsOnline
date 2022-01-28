@@ -1,5 +1,5 @@
 class Player {
-    constructor(width, height, x, y, name,id){
+    constructor(id,x,y,name,skin, headItem, outfit){
     this.mana = 1000;
     this.maxMana = 1000;
     this.manaRegenRate = 1;
@@ -12,8 +12,8 @@ class Player {
     this.direction = 'l';
     this.playerName = name;
     this.id = id;
-    this.width = width;
-    this.height = height;
+    this.width = 30;
+    this.height = 30;
     this.speed = 0;
     this.x = x;
     this.y = y;

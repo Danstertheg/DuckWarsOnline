@@ -6,8 +6,8 @@ socket.on('updatePlayers', function(newPlayerList) {
     for (x in newPlayerList){
       player = newPlayerList[x];
 
-      // NEW STYLE CODE (just line below)
-      tmpPlayer = new Player(30,30,player["color"],player["x"],player["y"],player["name"],player["id"],player["skin"], player["headItem"], player["outfit"]);
+      // NEW STYLE CODE (just line below) change id position to first later...
+      tmpPlayer = new Player(player["id"],player["x"],player["y"],player["name"],player["skin"], player["headItem"], player["outfit"]);
       tmpList.push(tmpPlayer);
       playersInLobby += player["name"] + ","
     }
