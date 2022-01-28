@@ -39,6 +39,9 @@ function JoinWorld() {
 }
 
 /// Lobby Code
+// function joinLobby(id){
+//     console.log(id)
+// }
 function showCreateLobbyForm(){
  let form = document.getElementById("createLobbyForm");
  form.style = "display:block;"
@@ -57,22 +60,49 @@ function createLobby(){
     socket.emit('createLobby',{name:lobbPassword,password:lobbName})
 }
 socket.on('updateLobbyList',function(list){
-    let matches = document.getElementById('matchContainer');
-    let newMatch = document.createElement("div");
-    newMatch.classList.add("match");
-    let matchName = document.createElement("div");
-    matchName.classList.add("gameID")
-    let matchCount = document.createElement("p");
-    matchCount.classList.add("playerCount");
-    let matchJoinBtn = document.createElement("img");
-    matchJoinBtn.classList.add("joinGame")
-    matchJoinBtn.src = "../img/join.png";
-    matchName.append(matchCount);
-    newMatch.append(matchName);
-    newMatch.append(matchJoinBtn);
-    matches.append(newMatch);
-console.log(list)
-console.log(list['values'][0][0]['lobbyName'])
+    let lobbyList = list['values'];
+    
+    Object.entries(lobbyList).forEach(([key, value]) => {
+
+        console.log(key, value) 
+        Object.entries(value).forEach(([lobbyId, lobby]) => {
+            console.log(lobbyId, lobby)
+            let matches = document.getElementById('matchContainer');
+            let newMatch = document.createElement("div");
+            newMatch.classList.add("match");
+
+            let matchName = document.createElement("div");
+             matchName.classList.add("gameID")
+            // set lobby name
+            matchName.innerText = lobby["lobbyName"];
+
+            let matchCount = document.createElement("p");
+            matchCount.classList.add("playerCount");
+            // set lobby player count
+            matchCount.innerText = lobby["playerCount"] + " players";
+
+            let matchJoinBtn = document.createElement("img");
+            matchJoinBtn.onclick = function(){
+                //When someone clicks join button, add their player onto the lobby with lobbyId clicked.
+                console.log(lobby["lobbyId"])
+            }
+            matchJoinBtn.classList.add("joinGame")
+            matchJoinBtn.src = "../img/join.png";
+            matchName.append(matchCount);
+            newMatch.append(matchName);
+            newMatch.append(matchJoinBtn);
+            matches.append(newMatch);
+
+
+
+        })
+      
+    })
+
+
+    
+// console.log(list)
+// console.log(list['values'][0][0]['lobbyName'])
 });
 // end of lobby code
 

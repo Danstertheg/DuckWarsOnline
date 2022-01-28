@@ -2,7 +2,7 @@ class HashTable {
     constructor() {
       this.values = {};
       this.length =  0;
-      this.size =  2;
+      this.size =  10;
     }
   
     calculateHash(lobbyId) {
