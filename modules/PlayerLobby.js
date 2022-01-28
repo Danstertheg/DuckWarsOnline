@@ -1,9 +1,17 @@
+const CryptoJS = require('crypto-js');
 class PlayerLobby{
     constructor(id,name,players,password){
         this.lobbyId = id;
         this.lobbyName = name;
         this.playerList = players;
-        this.password = password;
+        console.log(password)
+        if (password == ''){
+            this.password = '';
+        }
+        else{
+            console.log('encrypting pass')
+        this.password = this.encrypt(String(password));
+        }
         this.nextLobby = null; // linked list feature 
         this.playerCount = this.playerList.length;
 
@@ -15,13 +23,34 @@ class PlayerLobby{
         this.roomSize = 4;
         this.leaderId = null;
     }
+    encrypt(text){
+        //change passphrase to function variable and store in app.js server only
+        let passphrase = '1'
+        return CryptoJS.AES.encrypt(text, passphrase).toString();
+    }
+    decrypt(encryptedText){
+        let passphrase = '1'
+        let decrypted = CryptoJS.AES.decrypt(encryptedText, passphrase);
+        return decrypted.toString(CryptoJS.enc.Utf8);
+    }
+    checkPass(passAttempt){
+        console.log("pass attempt " + passAttempt)
+        console.log("comparing with" + this.decrypt(this.password))
+        //console.log(this.getPassword())
+        if (passAttempt == this.decrypt(this.getPassword())){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     getPlayerCount(){
         return this.playerCount;
     }
     getPlayerList (){
         return this.playerList;
     }
-    getpassword(){
+    getPassword(){
         return this.password;
     }
     getNextLobby(){
@@ -45,6 +74,7 @@ class PlayerLobby{
         else{
             console.log("player is already in this lobby, multilog attempt")
         }
+
     }
     checkPlayerInList(player){
         // returns true if player is in list, false otherwise

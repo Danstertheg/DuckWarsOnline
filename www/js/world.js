@@ -83,6 +83,7 @@ socket.on('updateLobbyList',function(list){
             matchCount.innerText = lobby["playerCount"] + " players";
 
             let matchJoinBtn = document.createElement("img");
+            
             matchJoinBtn.onclick = function(){
                 //When someone clicks join button, add their player onto the lobby with lobbyId clicked.
                 console.log(lobby["lobbyId"])
@@ -93,15 +94,21 @@ socket.on('updateLobbyList',function(list){
                 outfit = sessionStorage.getItem("outfit");
                 playerId = socket.id;
                 console.log(username);
-
+                if (lobby['password'] == ''){
                 /// add empty password check here, "if the user forgot to enter a password with a lobby that requires one."
                 /// check password size before sending also, just to reduce errors server has to handle
-                socket.emit("requestJoin",{pId:playerId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lobby["lobbyId"],password:lobby["password"]})
+                socket.emit("requestJoin",{pId:playerId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lobby["lobbyId"],password:''})
+                }
+                else{
+                    // lobby is password protected...
+                    openJoinForm(playerId,lobby["lobbyId"])
+                }
             }
             matchJoinBtn.classList.add("joinGame")
             matchJoinBtn.src = "../img/join.png";
             matchName.append(matchCount);
             newMatch.append(matchName);
+
             newMatch.append(matchJoinBtn);
             matches.append(newMatch);
 
@@ -116,8 +123,23 @@ socket.on('updateLobbyList',function(list){
 // console.log(list)
 // console.log(list['values'][0][0]['lobbyName'])
 });
-// end of lobby code
+function openJoinForm(playerId,lobbyId){
 
+    document.getElementById("joinForm").style = "display:block";
+    document.getElementById("lobbyId").value = lobbyId;
+    document.getElementById("playerId").value = playerId;
+}
+function attemptJoin(){
+    let username = sessionStorage.getItem("username");
+    let skin = sessionStorage.getItem("skin");
+    let headItem = sessionStorage.getItem("headItem");
+    let outfit = sessionStorage.getItem("outfit");
+    let passAttempt = document.getElementById("passAttempt").value;
+    let lId = document.getElementById("lobbyId").value;
+    let pId = document.getElementById("playerId").value;
+    socket.emit("requestJoin",{pId:pId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lId,password:passAttempt})
+}
+// end of lobby code
 
 // FADING FUNCTION: (Reduce opacity and then display: none)
 function fade(element) {

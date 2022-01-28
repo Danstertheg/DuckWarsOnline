@@ -87,17 +87,14 @@ function findPlayerInList(id){
 
 
 
-    if (lobbyRequested['password'] == passAttempt){
+    if (lobbyRequested.checkPass(passAttempt) || lobbyRequested['password'] == '' ){
       lobbyRequested.addPlayer(playerReq);
+      socket.join(lobbyRequested['lobbyId']);
       // successful entry to the lobby
-    }
-    else if (lobbyRequested['password'] == ''){
-      lobbyRequested.addPlayer(playerReq)
-      // lobby did not require password -> successful entry anyways
     }
     else{
       // unsuccessful entry, handle error back to user here 
-      console.log(socket.id + " has failed to enter the lobby: " + lobbyRequested['lobbName'])
+      console.log(socket.id + " has failed to enter the lobby: " + lobbyRequested['lobbyName'])
     }
    });
  //console.log("hi " + socket.id)

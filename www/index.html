@@ -70,12 +70,17 @@
                     <img class="joinGame" src="img/join.png" id="onlyGameForNow">
                 </div>
             </div>
-
+        <div id = "joinForm" style = "display: none;">
+            <input type = "hidden" id = "playerId">
+            <input type = "hidden" id = "lobbyId">
+            <input type = "text" id = "passAttempt">
+            <img class="joinGame" src="img/join.png" onclick="attemptJoin()">
+        </div>
 <!-- CREATE LOBBY HTML IS STARTED HERE-->
             <button id = "createLobby" onclick ="showCreateLobbyForm()">Create Lobby</button>
             <div id = "createLobbyForm" class = "createLobbyForm" style = "display:none;">
-                <input type = "text" placeholder = "Lobby name..." id = "lobbyName">
-                <input type = "password" placeholder = "Lobby password" id = "lobbyPassword">
+                <input type = "text" placeholder = "New lobby name..." id = "lobbyName">
+                <input type = "password" placeholder = "New lobby password" id = "lobbyPassword">
                 <button onclick = "createLobby()">Create</button>
             </div>
 <!-- CREATE LOBBY HTML IS ENDED HERE -->
