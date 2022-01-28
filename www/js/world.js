@@ -7,36 +7,75 @@ var username; // uid
 var nameInputOverlay = document.getElementById("nameInputOverlay");
 
 var usernameField = document.getElementById("usernameInput");
-var enterLobbyButton = document.getElementById("enterLobbyIMG");
+var enterWorldButton = document.getElementById("enterWorldIMG");
 var fadedAway = false;
 
-// Listen if user is trying to join lobby
-enterLobbyButton.addEventListener('click', function(){
+// Listen if user is trying to join world
+enterWorldButton.addEventListener('click', function(){
     if(usernameField.value !== "" && fadedAway == false) {
-        JoinLobby();
+        JoinWorld();
     }
 });
 document.addEventListener('keypress', function(e) {
-    // pressing enter to enter lobby
+    // pressing enter to enter world
     if (e.key === 'Enter' && usernameField.value !== "" && fadedAway == false) {
-        JoinLobby();
+        JoinWorld();
     }
     // pressing enter when overlay faded away (TO SEND A MESSAGE TO CHAT)
     if (e.key === 'Enter' && fadedAway == true) {
         SendMessage();
     }
 });
-function JoinLobby() {
+function JoinWorld() {
     username = usernameField.value;
     chatMessageField.placeholder = "Welcome " + username + "! Chat with other players...";
     document.getElementById("styleShopUsername").innerHTML = username; // for item shop!
     fade(nameInputOverlay);
     fadedAway = true;
 
-    socket.emit('playerJoinedLobby', {newPlayer:username, id:socket.id});
+    socket.emit('playerJoinedWorld', {newPlayer:username, id:socket.id});
 
     //document.getElementById("logout").style.display = 'block';
 }
+
+/// Lobby Code
+function showCreateLobbyForm(){
+ let form = document.getElementById("createLobbyForm");
+ form.style = "display:block;"
+}
+function createLobby(){
+    let lobbName = document.getElementById("lobbyName").value;
+    let lobbPassword = document.getElementById("lobbyPassword").value;
+    /// ensure to filter out empty strings here 
+
+    if (lobbName == ''){
+        console.log("handle empty name here")
+    }
+    if (lobbPassword == ''){
+        lobbPassword = '';
+    }
+    socket.emit('createLobby',{name:lobbPassword,password:lobbName})
+}
+socket.on('updateLobbyList',function(list){
+    let matches = document.getElementById('matchContainer');
+    let newMatch = document.createElement("div");
+    newMatch.classList.add("match");
+    let matchName = document.createElement("div");
+    matchName.classList.add("gameID")
+    let matchCount = document.createElement("p");
+    matchCount.classList.add("playerCount");
+    let matchJoinBtn = document.createElement("img");
+    matchJoinBtn.classList.add("joinGame")
+    matchJoinBtn.src = "../img/join.png";
+    matchName.append(matchCount);
+    newMatch.append(matchName);
+    newMatch.append(matchJoinBtn);
+    matches.append(newMatch);
+console.log(list)
+console.log(list['values'][0][0]['lobbyName'])
+});
+// end of lobby code
+
 
 // FADING FUNCTION: (Reduce opacity and then display: none)
 function fade(element) {
@@ -56,6 +95,7 @@ function fade(element) {
 
 
 // FETCHING LOBBY LIST: =======================================================================
+var onlyGameForNow = document.getElementById("onlyGameForNow");
 onlyGameForNow.addEventListener('click', function() {
     JoinGame();
 });
@@ -79,12 +119,12 @@ var chatMessageBtn = document.getElementById("sendMessage");
 var chatConversationContainer = document.getElementById("chatConversationContainer");
 
 // "player joined" message:
-socket.on('playerJoinedLobby', function(msg) {
+socket.on('playerJoinedWorld', function(msg) {
     var newPlayer = msg["newPlayer"];
     chatConversationContainer.innerHTML += "<div class='message'><strong>- " + newPlayer + "</strong> has arrived at the lake! -</div>";
 });
 // "player left" message:
-socket.on('playerLeftLobby', function(msg) {
+socket.on('playerLeftWorld', function(msg) {
     chatConversationContainer.innerHTML += "<div class='message'>- Someone flew away -</div>";
 });
 

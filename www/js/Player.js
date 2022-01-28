@@ -1,4 +1,4 @@
-const e = require("express");
+//const e = require("express");
 
 function Player(width, height, color, x, y, name,id,skin, headItem, outfit) {
       if (outfit == "noneOutfit")
@@ -143,8 +143,28 @@ function Player(width, height, color, x, y, name,id,skin, headItem, outfit) {
         ctx.fillText(msg,40,100);
       }
       this.newPos = function() {
+        // keep in mind that player bounds should be checked by server also to avoid cheating TODO
+        let inBounds = true;
+          if (this.Xspeed > 0 && this.x >= canvasWidth - 50 ){
+            inBounds = false
+            // moving right
+          }
+          else if (this.Xspeed < 0 && this.x <= 0 ){
+            inBounds = false
+            // moving left
+          }
+          if (this.Yspeed > 0 && this.y < 0){
+            inBounds = false
+            // moving up
+          }
+          else if (this.Yspeed < 0 && this.y >= canvasHeight - 50){
+            // moving down
+            inBounds = false
+          }
+          if (inBounds){
           this.x += this.Xspeed;
           this.y -= this.Yspeed;
+          }
          // console.log(this.x, this.y);
       }
   }

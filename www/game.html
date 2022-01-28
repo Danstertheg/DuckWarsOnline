@@ -77,9 +77,21 @@
     <script src="js/Player.js"></script>
     <script src='js/BreadProjectile.js'></script>
     <script src='js/WaterDash.js'></script>
-    <script src='js/WaterShield.js'></script>
+    <script src='js/WaterReflect.js'></script>
     <script src='js/WaterShot.js'></script>
+    <script src='js/Animator.js'></script>
     <script>
+      /// test for water reflect, if this works it will be used in future for all other animations
+      var animation = []
+      for (i = 0; i < 51; i ++){
+            animation.push(new Image());
+            animation[i].src = 'img/WaterReflect/frame_' + i + '_delay-0.04s.gif'
+            console.log(animation[i].src)
+        }
+
+        // end of test code
+    var assets = ['WaterDash','WaterReflect','WaterShot'];
+    var animationFrames = new Animator(assets)
     var socket = io();
     var shootCharge = 0;
 
@@ -294,10 +306,10 @@
       // let waterAbility = new WaterShot(socket.id);
       // projectiles.push(waterAbility)
     }
-    function waterShield(){
+    function waterReflect(){
       let X = (myGamePiece.direction == 'r') ? myGamePiece.x + 25 : myGamePiece.x - 25;
       let Y = myGamePiece.y; 
-      socket.emit('waterShield',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,type:'waterDash'})
+      socket.emit('waterReflect',{id:socket.id,x:X,y:Y,direction:myGamePiece.direction,type:'waterReflect'})
     }
     function updateGameArea() {
           myGameArea.clear();
@@ -349,18 +361,30 @@
             // shoot bread spacebar
           }
            if (myGameArea.keys && myGameArea.keys[88]){
-             if (myGamePiece.mana >= 250){
+             if (myGamePiece.mana >= 100){
+               // Water dash with x
              Dash();
-             myGamePiece.mana = myGamePiece.mana - 250;
-             myGamePiece.attackTick = 0;
+             myGamePiece.mana = myGamePiece.mana - 100;
+             // make it so they can attack sooner right after they dashed (to make game funner)
+             myGamePiece.attackTick = 3;
              }
              
           }
           if (myGameArea.keys && myGameArea.keys[90]){
+            // Water ability 
+            if (myGamePiece.mana >= 250){
+              // WaterShot ability costs 250 mana with z
+            waterShot();
+            myGamePiece.mana = myGamePiece.mana - 250;
+            // They now have to wait till attackTick increases to attackDelay to use another attack again
+            myGamePiece.attackTick = 0;
+            }
+          }
+          if (myGameArea.keys && myGameArea.keys[67]){
             // Water ability
             if (myGamePiece.mana >= 250){
-              // WaterShot ability costs 250 mana
-            waterShot();
+              // Water Reflect with c
+            waterReflect();
             myGamePiece.mana = myGamePiece.mana - 250;
             // They now have to wait till attackTick increases to attackDelay to use another attack again
             myGamePiece.attackTick = 0;

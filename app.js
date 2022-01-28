@@ -1,4 +1,30 @@
+const Player = require('./modules/Player');
 const PlayerLobby = require("./modules/PlayerLobby");
+const lobbyHashTable = require('./modules/HashTable');
+const lobbyLinkedList = require ('./modules/LinkedList');
+var table = new lobbyHashTable();
+var lobbyCount = 0;
+/// player lobby code testing
+ let player1 = new Player();
+// let player2 = new Player();
+// let player3 = new Player();
+// let player4 = new Player();
+// let player5 = new Player();
+
+// let lobby1 = new PlayerLobby(1,[player1,player2],'password');
+// let lobby2 = new PlayerLobby(2,[player4],'test');
+// let lobby3 = new PlayerLobby(3,[player3,player5],'password');
+
+
+// table.add(lobby1);
+// table.add(lobby2);
+// table.add(lobby3);
+
+
+// table.show();
+///////
+
+
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -16,8 +42,7 @@ var playerCount = 0;
 const roomSize = 4;
 var gameStarted = false;
 var gameEnded = false;
-var skins = ["oats","danky","mr.goose","mr.goose"];
-
+//var skins = ["oats","danky","mr.goose","mr.goose"];
 app.use(express.static(__dirname +"/www"));
 app.get('/', (req, res) => {
   console.log("__dirname is : "+__dirname +"/www")
@@ -31,7 +56,22 @@ function findPlayerInList(id){
   }
   return null
  }
+ io.on('connection', (socket) => {
+  io.to(socket.id).emit('updateLobbyList',table);
+   socket.on('createLobby', (lobby) => {
+    let lobbName = lobby['name'];
+    let lobbPass = lobby['password'];
+    let newLobby = new PlayerLobby(lobbyCount,lobbName,[player1],lobbPass)
+    table.add(newLobby)
+    lobbyCount++;
+    // perhaps remove this in the future so that only refresh shows new lobby (could be unstable if many people are creating lobbies to have multiple new ones appear in the list simulatenously)
+   // io.emit("addLobby",{})
+   });
+ //console.log("hi " + socket.id)
+});
+
 io.on('connection', (socket) => {
+  //console.log("connected " + socket.id )
   io.emit("gameStatus", {started:gameStarted,ended:gameEnded});
   io.emit('updatePlayers', playerList);
     socket.on('message', (msg) => {
@@ -53,8 +93,8 @@ io.on('connection', (socket) => {
       io.emit('chatMessage', msg);
     });
 
-    socket.on('playerJoinedLobby', (playerInfo) => {
-      io.emit('playerJoinedLobby', playerInfo);
+    socket.on('playerJoinedWorld', (playerInfo) => {
+      io.emit('playerJoinedWorld', playerInfo);
     });
 
     socket.on('lastPlayerLeft', () => {
@@ -144,6 +184,12 @@ io.on('connection', (socket) => {
         projectiles.push(projectile);
         console.log(projectiles);
         io.emit('updateProjectiles', projectile);
+      })
+      socket.on('waterReflect',(reflectProperties)=> {
+        console.log(reflectProperties['id'] + ' has just created a reflect shield.');
+        abilities.push(reflectProperties);
+        console.log(abilities);
+        io.emit('updateAbilities',reflectProperties);
       })
       socket.on('requestProjectileLocation',(projectile)=>{
         io.emit('updatedProjectiles', projectiles);

@@ -66,8 +66,9 @@ function abilityFilter(id,type){
       console.log('Water Dash received by server ' + id);
       abilities.push(new WaterDash(id))
       break;
-    case 'waterShield':
-      console.log('Water Shield')
+    case 'waterReflect':
+      console.log('Water reflection received by server ' + id);
+      abilities.push(new WaterReflect(id))
       // code block
       break;
     default:
@@ -122,7 +123,7 @@ function abilityFilter(id,type){
             let livesLeft = playerList[findPlayerInList(id)].lives;
             for (i = 0; i < livesLeft; i++){
                 let life = document.createElement('img');
-                life.src = myGamePiece.skin + '_l_idle1.png';
+                life.src = myGamePiece.bodyIMG + 'l_idle1.png';
                 life.classList.add('life');
                 myLifeImages.appendChild(life);
             }
