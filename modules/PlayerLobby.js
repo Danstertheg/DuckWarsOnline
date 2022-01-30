@@ -1,4 +1,5 @@
 const CryptoJS = require('crypto-js');
+
 class PlayerLobby{
     constructor(id,name,players,password){
         this.lobbyId = id;
@@ -25,19 +26,20 @@ class PlayerLobby{
     }
     encrypt(text){
         //change passphrase to function variable and store in app.js server only
-        let passphrase = '1'
-        return CryptoJS.AES.encrypt(text, passphrase).toString();
+        
+        var hash = CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex);
+        return hash;
     }
-    decrypt(encryptedText){
-        let passphrase = '1'
-        let decrypted = CryptoJS.AES.decrypt(encryptedText, passphrase);
-        return decrypted.toString(CryptoJS.enc.Utf8);
-    }
+    // decrypt(encryptedText){
+    //     let passphrase = '1'
+    //     let decrypted = CryptoJS.AES.decrypt(encryptedText, passphrase);
+    //     return decrypted.toString(CryptoJS.enc.Utf8);
+    // }
     checkPass(passAttempt){
-        console.log("pass attempt " + passAttempt)
-        console.log("comparing with" + this.decrypt(this.password))
+        console.log("pass attempt " + this.encrypt(passAttempt))
+        console.log("comparing with" + this.password)
         //console.log(this.getPassword())
-        if (passAttempt == this.decrypt(this.getPassword())){
+        if (this.encrypt(passAttempt) == this.getPassword()){
             return true;
         }
         else {

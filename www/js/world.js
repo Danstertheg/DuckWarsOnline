@@ -26,6 +26,26 @@ document.addEventListener('keypress', function(e) {
         SendMessage();
     }
 });
+function signup(){
+console.log("attempting to sign up..");
+
+let username = document.getElementById("signupUsername").value;
+let password = document.getElementById("signupPassword").value;
+let cPassword = document.getElementById("signupCPassword").value;
+
+if (password == cPassword){
+    // the password and confirm password fields are equivalent
+    
+}
+else{
+    // the password and confirm password fields are not equivalent
+
+}
+
+}
+function login(){
+console.log("attempting to login...")
+}
 function JoinWorld() {
     username = usernameField.value;
     sessionStorage.setItem("username", username);
@@ -139,6 +159,9 @@ function attemptJoin(){
     let pId = document.getElementById("playerId").value;
     socket.emit("requestJoin",{pId:pId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lId,password:passAttempt})
 }
+socket.on("successfulJoin",function(){
+JoinGame();
+});
 // end of lobby code
 
 // FADING FUNCTION: (Reduce opacity and then display: none)
@@ -165,7 +188,7 @@ onlyGameForNow.addEventListener('click', function() {
 });
 
 function JoinGame() {
-    sessionStorage.setItem("username", username);
+    //sessionStorage.setItem("username", username);
     window.location.href = 'game.html';
 }
 

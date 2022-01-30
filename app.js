@@ -2,36 +2,25 @@ const Player = require('./modules/Player');
 const PlayerLobby = require("./modules/PlayerLobby");
 const lobbyHashTable = require('./modules/HashTable');
 const lobbyLinkedList = require ('./modules/LinkedList');
+// handles all joining lobbies, leaving lobbies, etc...
+
 var table = new lobbyHashTable();
 var lobbyCount = 0;
-/// player lobby code testing
  let player1 = new Player();
-// let player2 = new Player();
-// let player3 = new Player();
-// let player4 = new Player();
-// let player5 = new Player();
 
-// let lobby1 = new PlayerLobby(1,[player1,player2],'password');
-// let lobby2 = new PlayerLobby(2,[player4],'test');
-// let lobby3 = new PlayerLobby(3,[player3,player5],'password');
-
-
-// table.add(lobby1);
-// table.add(lobby2);
-// table.add(lobby3);
-
-
-// table.show();
-///////
-
-
+var fs = require("fs");
+fs.appendFile('users.txt', 'Hello content!', function (err) {
+  if (err) throw err;
+  console.log('Saved!');
+});
 const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server, Socket } = require("socket.io");
-const { join } = require('path');
+const path = require('path');
 const io = new Server(server);
+
 // all these vars will be needed in the future when creating a playerLobby class. 
 // leader id is the socket connection id of the lobby leader. so that only this character can start the match and select game mode in the future.
 var leaderId;
@@ -43,7 +32,7 @@ var playerCount = 0;
 const roomSize = 4;
 var gameStarted = false;
 var gameEnded = false;
-//var skins = ["oats","danky","mr.goose","mr.goose"];
+
 app.use(express.static(__dirname +"/www"));
 app.get('/', (req, res) => {
   console.log("__dirname is : "+__dirname +"/www")
@@ -57,6 +46,9 @@ function findPlayerInList(id){
   }
   return null
  }
+
+
+ /// all lobby code here
  io.on('connection', (socket) => {
   io.to(socket.id).emit('updateLobbyList',table);
    socket.on('createLobby', (lobby) => {
@@ -90,6 +82,7 @@ function findPlayerInList(id){
     if (lobbyRequested.checkPass(passAttempt) || lobbyRequested['password'] == '' ){
       lobbyRequested.addPlayer(playerReq);
       socket.join(lobbyRequested['lobbyId']);
+      io.to(socket.id).emit('successfulJoin');
       // successful entry to the lobby
     }
     else{
@@ -99,6 +92,8 @@ function findPlayerInList(id){
    });
  //console.log("hi " + socket.id)
 });
+/// lobby code ends here
+
 
 io.on('connection', (socket) => {
   //console.log("connected " + socket.id )
@@ -332,3 +327,4 @@ setInterval(runGame,20)
 server.listen(8000,() => {
   console.log('listening on *:8000');
 });
+
