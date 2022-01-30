@@ -193,6 +193,7 @@ textarea:focus, input:focus{
     padding: 5px 10px 5px;
     height: 40px;
     width: 280px;
+    
 }
 #createGame {
     height: 45px;
@@ -203,7 +204,7 @@ textarea:focus, input:focus{
     
 }
 
-#gamePassword {
+.gamePassword {
     font-size: 22px;
     padding: 5px 10px 5px;
     height: 40px;

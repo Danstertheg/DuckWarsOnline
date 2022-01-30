@@ -11,7 +11,7 @@ class PlayerLobby{
         }
         else{
             console.log('encrypting pass')
-        this.password = this.encrypt(String(password));
+        this.password = String(password);
         }
         this.nextLobby = null; // linked list feature 
         this.playerCount = this.playerList.length;
@@ -24,22 +24,22 @@ class PlayerLobby{
         this.roomSize = 4;
         this.leaderId = null;
     }
-    encrypt(text){
-        //change passphrase to function variable and store in app.js server only
+    // encrypt(text){
+    //     //change passphrase to function variable and store in app.js server only
         
-        var hash = CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex);
-        return hash;
-    }
+    //     var hash = CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex);
+    //     return hash;
+    // }
     // decrypt(encryptedText){
     //     let passphrase = '1'
     //     let decrypted = CryptoJS.AES.decrypt(encryptedText, passphrase);
     //     return decrypted.toString(CryptoJS.enc.Utf8);
     // }
     checkPass(passAttempt){
-        console.log("pass attempt " + this.encrypt(passAttempt))
+        console.log("pass attempt " + passAttempt)
         console.log("comparing with" + this.password)
         //console.log(this.getPassword())
-        if (this.encrypt(passAttempt) == this.getPassword()){
+        if (passAttempt == this.getPassword()){
             return true;
         }
         else {

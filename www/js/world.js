@@ -1,6 +1,10 @@
 var socket = io();
 
-
+function johnWickryption(text){
+    /* this function takes text, and then encrypts it into a random string that is not reversable */
+    /* used to send password encrypted to the database, the only way to see if it's correct is to encrypt it and compare the two jumbled passwords */
+return CryptoJS.SHA256(text).toString(CryptoJS.enc.Hex);
+}
 // 1. LOGGING INTO LOBBY:=======================================================================
 var username; // uid
 
@@ -36,7 +40,9 @@ let cPassword = document.getElementById("signupCPassword").value;
 if (password == cPassword){
     // the password and confirm password fields are equivalent
     // password should be sent encrypted by sha256 here before it is even sent to the server when signup (vulnerability during sign up here )
-    socket.emit("playerSignup",{username:username,password:password})
+    var hash = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+    console.log(hash)
+    socket.emit("playerSignup",{username:username,password:hash})
 }
 else{
     console.log("confirm password and password fields are not equivalent, please double check.")
@@ -82,7 +88,7 @@ function DisplayCreateGameForm() {
 
                 <div class="createGameFormRow" id="passwordRow">
                     <p>Password:</p>
-                    <input type="text" placeholder="Enter a password..." id="createdGamePassword">
+                    <input type="password" placeholder="Enter a password..." id="createdGamePassword">
                 </div> 
 
                 <div style="display: flex; justify-content: center;"><img src="img/createGameForm.png" id="createGame"></div>
@@ -129,7 +135,7 @@ function DisplayCreateGameForm() {
             
             if (gamePrivateField.checked) {// if it has a PW
                 //alert("Game created successfully! Find it on the Public Games list or, if private, search for it below.")
-                socket.emit('createLobby',{name: gameIDField.value, password: gamePWField.value});
+                socket.emit('createLobby',{name: gameIDField.value, password:johnWickryption(gamePWField.value)});
                 DisplayPublicGames(); // GAME CREATED SUCCESSFULLY, go back to the lobby and search for it or see it in Public list
             }
             else {
@@ -158,6 +164,16 @@ function DisplayPublicGames() {
                             <img class="joinGame" src="img/join.png" id="onlyGameForNow">
                         </div>
                     </div>
+                    <div id = "joinForm" style="display:none;">
+            <img src="img/goBack.png" onclick="DisplayPublicGames()" title="Go back" class="goBack">
+            <div class="createGameFormRow" style="flex-direction: column;">
+                <p>Enter Password</p>
+                <input  class = "gamePassword" id = "passAttempt" type="password" >
+                <img class="joinGame" src="img/join.png" onclick = "attemptJoin()" style="margin-top: 20px;"> 
+                <input type = "hidden" id = "playerId">
+                <input type = "hidden" id = "lobbyId">
+            </div>
+            </div>
                     <div class="findCreateActions">
                     <div id = "findGameInput">
                         <input type="text" placeholder="Do not try. Not ready" id="findGameField" >
@@ -172,10 +188,12 @@ function DisplayPublicGames() {
 }
 
 // C. Search for Game ID: =============================  needs work!
-var matchList = document.getElementById("matchContainer"); // where all matches are listed and where we will list the result of a SUCCESSFUL SEARCH
-var gameFindField = document.getElementById("findGameField");
+
 
 function SearchForGame() {
+    var matchList = document.getElementById("matchContainer"); // where all matches are listed and where we will list the result of a SUCCESSFUL SEARCH
+var gameFindField = document.getElementById("findGameField");
+    console.log("hi")
     if (gameFindField.value === "") // if it is empty, gtfo
         return;
 
@@ -206,38 +224,38 @@ function SearchForGame() {
     }
 };
 
-function OpenPWInputForm(gameID) {
-    document.getElementById("gameListSection").innerHTML =  ` <div style="height: 100%; width: 100%;">
-                                <img src="img/goBack.png" onclick="DisplayPublicGames()" title="Go back" class="goBack">
-                                <div class="createGameFormRow" style="flex-direction: column;">
-                                    <p>Enter Password</p>
-                                    <input type="text" id="gamePassword">
-                                    <img class="joinGame" src="img/join.png" id="attemptPW" style="margin-top: 20px;"> 
-                                </div>
-                                </div>`;
-    // function to test pw is encapsuled in this if-statement cuz it is specific to this route
-    var attemptedPWField = document.getElementById("gamePassword");
-    document.getElementById("attemptPW").addEventListener("click", function() {
-        if (attemptedPWField.value === "") // if it is empty, gtfo
-            return;
-        attemptJoinViaPW(gameID, attemptedPWField.value);
+// function OpenPWInputForm(gameID) {
+//     document.getElementById("gameListSection").innerHTML =  ` <div style="height: 100%; width: 100%;">
+//                                 <img src="img/goBack.png" onclick="DisplayPublicGames()" title="Go back" class="goBack">
+//                                 <div class="createGameFormRow" style="flex-direction: column;">
+//                                     <p>Enter Password</p>
+//                                     <input type="text" id="gamePassword">
+//                                     <img class="joinGame" src="img/join.png" id="attemptPW" style="margin-top: 20px;"> 
+//                                 </div>
+//                                 </div>`;
+//     // function to test pw is encapsuled in this if-statement cuz it is specific to this route
+//     var attemptedPWField = document.getElementById("gamePassword");
+//     document.getElementById("attemptPW").addEventListener("click", function() {
+//         if (attemptedPWField.value === "") // if it is empty, gtfo
+//             return;
+//         attemptJoin(gameID, attemptedPWField.value);
 
-        // if it didn't go to game.html -> pw is incorrect -> let them know via this css:
-        attemptedPWField.value = "";
-        attemptedPWField.style.border = "red solid 3px";
-        attemptedPWField.placeholder = "Incorrect password, try again";
+//         // if it didn't go to game.html -> pw is incorrect -> let them know via this css:
+//         attemptedPWField.value = "";
+//         attemptedPWField.style.border = "red solid 3px";
+//         attemptedPWField.placeholder = "Incorrect password, try again";
 
-       /* if (true) { // PW is incorrect
-            attemptedPWField.value = "";
-            attemptedPWField.style.border = "red solid 3px";
-            attemptedPWField.placeholder = "Incorrect password, try again"
-        } else { // PW IS CORRECT ! (let them in the game - in game.html) 
-            // call function to let them in the game by giving it the gameID - this variable: desiredGame
-            attemptJoinViaPW(gameID, attemptedPWField.value);
-        }*/
-    })
+//        /* if (true) { // PW is incorrect
+//             attemptedPWField.value = "";
+//             attemptedPWField.style.border = "red solid 3px";
+//             attemptedPWField.placeholder = "Incorrect password, try again"
+//         } else { // PW IS CORRECT ! (let them in the game - in game.html) 
+//             // call function to let them in the game by giving it the gameID - this variable: desiredGame
+//             attemptJoinViaPW(gameID, attemptedPWField.value);
+//         }*/
+//     })
 
-}
+// }
 
 
 /// Lobby Code
@@ -298,14 +316,14 @@ socket.on('updateLobbyList',function(list){
                 playerId = socket.id;
                 console.log(username);
                 if (lobby['password'] == ''){
-                /// add empty password check here, "if the user forgot to enter a password with a lobby that requires one."
+ 
                 /// check password size before sending also, just to reduce errors server has to handle
                 socket.emit("requestJoin",{pId:playerId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lobby["lobbyId"],password:''})
                 }
                 else{
                     // lobby is password protected...
-                    //openJoinForm(playerId,lobby["lobbyId"])
-                    OpenPWInputForm(lobby["lobbyId"]);
+                    openJoinForm(playerId,lobby["lobbyId"])
+                    //OpenPWInputForm(lobby["lobbyId"]);
                 }
             }
             matchJoinBtn.classList.add("joinGame")
@@ -326,22 +344,23 @@ socket.on('updateLobbyList',function(list){
 // console.log(list['values'][0][0]['lobbyName'])
 });
 
-/*function openJoinForm(playerId,lobbyId){
-
-    document.getElementById("joinForm").style = "display:block";
+function openJoinForm(playerId,lobbyId){
+    
+    document.getElementById("joinForm").style = "display:block; height: 100%; width: 100%; z-index:99;";
     document.getElementById("lobbyId").value = lobbyId;
     document.getElementById("playerId").value = playerId;
-}*/
-function attemptJoinViaPW(gameID, gamePW){
+}
+function attemptJoin(){
     let username = sessionStorage.getItem("username");
     let skin = sessionStorage.getItem("skin");
     let headItem = sessionStorage.getItem("headItem");
     let outfit = sessionStorage.getItem("outfit");
-    //let passAttempt = document.getElementById("passAttempt").value;
-    //let lId = document.getElementById("lobbyId").value;
-    //let pId = document.getElementById("playerId").value;
-    socket.emit("requestJoin",{pId:socket.id, playerName:username, skin:skin, headItem:headItem, outfit:outfit, lId:gameID, password:gamePW})
+    let passAttempt = document.getElementById("passAttempt").value;
+    let lId = document.getElementById("lobbyId").value;
+    let pId = document.getElementById("playerId").value;
+    socket.emit("requestJoin",{pId:pId,playerName:username,skin:skin,headItem:headItem, outfit:outfit,lId:lId,password:johnWickryption(passAttempt)})
 }
+
 socket.on("successfulJoin",function(){
     JoinGame();
 });

@@ -8,6 +8,8 @@
     <style>
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- crypto js is used during sign up and login!!!!!!!!!!!!!!!!!! Client does encrypting, this way the server has no idea what the password is and neither would an attacker. only the owner (self)-->
 </head>
 <body>
     <div id="nameInputOverlay">
@@ -153,6 +155,16 @@
             <input type = "password" placeholder = "New lobby password" id = "lobbyPassword">
             <button onclick = "createLobby()">Create</button>
         </div--->
+        <div id = "joinForm" style="display:none;">
+            <img src="img/goBack.png" onclick="DisplayPublicGames()" title="Go back" class="goBack">
+            <div class="createGameFormRow" style="flex-direction: column;">
+                <p>Enter Password</p>
+                <input  class = "gamePassword" id = "passAttempt" type="password" >
+                <img class="joinGame" src="img/join.png" onclick = "attemptJoin()" style="margin-top: 20px;"> 
+                <input type = "hidden" id = "playerId">
+                <input type = "hidden" id = "lobbyId">
+            </div>
+            </div>
 
             <div class="findCreateActions">
                 <div id = "findGameInput">

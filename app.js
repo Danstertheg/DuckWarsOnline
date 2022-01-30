@@ -46,16 +46,25 @@ function findPlayerInList(id){
   }
   return null
  }
-
-
+// all login signup code here
+ io.on('connection', (socket) => {
+   socket.on("playerSignup",(user)=>{
+    console.log(user);
+   })
+ });
+// user login signup
  /// all lobby code here
  io.on('connection', (socket) => {
-  io.to(socket.id).emit('updateLobbyList',table);
+
+
   
   // to update lobby list plz:
-  socket.on('getLobbyList', () => {
-    io.to(socket.id).emit('updateLobbyList',table);
-  })
+
+  io.to(socket.id).emit('updateLobbyList',table);
+
+ socket.on('getLobbyList', () => {
+     io.to(socket.id).emit('updateLobbyList',table);
+   })
 
    socket.on('createLobby', (lobby) => {
     let lobbName = lobby['name'];
