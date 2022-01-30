@@ -51,6 +51,12 @@ function findPlayerInList(id){
  /// all lobby code here
  io.on('connection', (socket) => {
   io.to(socket.id).emit('updateLobbyList',table);
+  
+  // to update lobby list plz:
+  socket.on('getLobbyList', () => {
+    io.to(socket.id).emit('updateLobbyList',table);
+  })
+
    socket.on('createLobby', (lobby) => {
     let lobbName = lobby['name'];
     let lobbPass = lobby['password'];
@@ -75,13 +81,16 @@ function findPlayerInList(id){
     
     let id = joinReq['lId'];
     let passAttempt = joinReq['password'];
+    console.log("gameID: " + id);
     let lobbyRequested = table.search(id);
 
 
 
     if (lobbyRequested.checkPass(passAttempt) || lobbyRequested['password'] == '' ){
+      console.log("SUCCESS, player is joining...");
       lobbyRequested.addPlayer(playerReq);
       socket.join(lobbyRequested['lobbyId']);
+      
       io.to(socket.id).emit('successfulJoin');
       // successful entry to the lobby
     }
@@ -93,6 +102,7 @@ function findPlayerInList(id){
  //console.log("hi " + socket.id)
 });
 /// lobby code ends here
+
 
 
 io.on('connection', (socket) => {

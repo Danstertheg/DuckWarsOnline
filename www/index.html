@@ -3,6 +3,7 @@
 <head>
     <title>Duck Wars | World</title>
     <link rel="stylesheet" href="css/world.css">
+    <link rel="stylesheet" href="css/styleShop.css">
     <link rel = "stylesheet" href="css/loginSignup.css">
     <style>
 
@@ -128,36 +129,41 @@
     <div class="header"><img src="img/logo.png"></div>
     <div class="mainFlexContainer">
 
-        <div class="flexItem gamesList">
-            <div class="boxTitle">Select Game</div>
-            <!-- <div class="boxTitle">Create Lobby</div> -->
+        <!--GAMES BOX (initially "Public Games")-->
+        <div class="flexItem gamesList" id="gameListSection">
+            <div class="boxTitle">Public Games</div> 
             <div id="matchContainer">
                 <div class="match">
-                    <div class="gameID">VEGAN-CLUB
+                    <div class="gameID"> LENTIL-SOUP
                         <p id="playerCount"> _ players</p>
                     </div>
                     <img class="joinGame" src="img/join.png" id="onlyGameForNow">
                 </div>
             </div>
-        <div id = "joinForm" style = "display: none;">
+
+
+        <!---div id = "joinForm" style="display:none;">         OLD JOIN LOBBY 
             <input type = "hidden" id = "playerId">
             <input type = "hidden" id = "lobbyId">
             <input type = "text" id = "passAttempt">
             <img class="joinGame" src="img/join.png" onclick="attemptJoin()">
-        </div>
-<!-- CREATE LOBBY HTML IS STARTED HERE-->
-            <button id = "createLobby" onclick ="showCreateLobbyForm()">Create Lobby</button>
-            <div id = "createLobbyForm" class = "createLobbyForm" style = "display:none;">
-                <input type = "text" placeholder = "New lobby name..." id = "lobbyName">
-                <input type = "password" placeholder = "New lobby password" id = "lobbyPassword">
-                <button onclick = "createLobby()">Create</button>
+        </div---->
+        <!---div id = "createLobbyForm" class = "createLobbyForm" style = "display:none;">      OLD CREATE LOBBY
+            <input type = "text" placeholder = "New lobby name..." id = "lobbyName">
+            <input type = "password" placeholder = "New lobby password" id = "lobbyPassword">
+            <button onclick = "createLobby()">Create</button>
+        </div--->
+
+            <div class="findCreateActions">
+                <div id = "findGameInput">
+                    <input type="text" placeholder="Do not try. Not ready" id="findGameField" >
+                    <img class="findGameButton" onclick="SearchForGame()" src="img/find.png" title="Find a game">
+                </div>
+                <img src="img/createGame.png" id = "createLobby" onclick ="DisplayCreateGameForm()" title="Create a new game!">
             </div>
-<!-- CREATE LOBBY HTML IS ENDED HERE -->
-
-
-
         </div>
 
+        <!--CHAT BOX:-->
         <div class="flexItem chat">
             <div class="boxTitle">Chat</div>
             <div id="chatConversationContainer">
@@ -169,7 +175,7 @@
             </div>
         </div>
     </div>
-    <div class="footer">LakeDeep Games © 2006</div>
+    <div class="footer">LakeDeep Games © | Happy New Year 2006!</div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/world.js"></script>
