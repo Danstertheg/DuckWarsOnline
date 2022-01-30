@@ -26,6 +26,26 @@ document.addEventListener('keypress', function(e) {
         SendMessage();
     }
 });
+function signup(){
+console.log("attempting to sign up..");
+
+let username = document.getElementById("signupUsername").value;
+let password = document.getElementById("signupPassword").value;
+let cPassword = document.getElementById("signupCPassword").value;
+
+if (password == cPassword){
+    // the password and confirm password fields are equivalent
+    
+}
+else{
+    // the password and confirm password fields are not equivalent
+
+}
+
+}
+function login(){
+console.log("attempting to login...")
+}
 function JoinWorld() {
     username = usernameField.value;
     sessionStorage.setItem("username", username);
@@ -350,7 +370,8 @@ onlyGameForNow.addEventListener('click', function() {
 
 function JoinGame() {
     sessionStorage.setItem("username", username);
-    window.location.href = 'game.html?game:' + "SD";
+    
+    window.location.href = 'game.html';
 }
 
 // MORE GAMES AT ONCE IS FUTURE IMPLEMENTATION! not in this commit bois

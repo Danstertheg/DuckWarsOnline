@@ -4,10 +4,79 @@
     <title>Duck Wars | World</title>
     <link rel="stylesheet" href="css/world.css">
     <link rel="stylesheet" href="css/styleShop.css">
+    <link rel = "stylesheet" href="css/loginSignup.css">
+    <style>
+
+    </style>
 </head>
 <body>
     <div id="nameInputOverlay">
         <img class="overlayLogo" src="img/logo.png">
+
+        <!-- Start of login and sign up demos -->
+       
+            <div class="cont_centrar">
+            
+              <div class="cont_login">
+            <div class="cont_info_log_sign_up">
+                  <div class="col_md_login">
+            <div class="cont_ba_opcitiy">
+                    
+                    <h2>LOGIN</h2>  
+              <p>Already Have an account?.</p> 
+              <button class="btn_login" onclick="cambiar_login()">LOGIN</button>
+              </div>
+              </div>
+            <div class="col_md_sign_up">
+            <div class="cont_ba_opcitiy">
+              <h2>SIGN UP</h2>
+            
+              
+              <p>Want to create an account?</p>
+            
+              <button class="btn_sign_up" onclick="cambiar_sign_up()">SIGN UP</button>
+            </div>
+              </div>
+                   </div>
+            
+                
+                <div class="cont_back_info">
+                   <div class="cont_img_back_grey">
+                   <img src="img/animations/danky/Danky_r_idle2.png" alt="" />
+                   </div>
+                   
+                </div>
+            <div class="cont_forms" >
+                <div class="cont_img_back_">
+                   <img src="img/animations/oats/Oats_l_idle2.png" alt="" />
+                   </div>
+             <div class="cont_form_login">
+            <a href="#" onclick="ocultar_login_sign_up()" ><i class="material-icons">Return</i></a>
+               <h2>LOGIN</h2>
+             <input id = "loginUsername" type="text" placeholder="Username" />
+            <input id = "loginPassword" type="password" placeholder="Password" />
+            <button class="btn_login" onclick="login()">LOGIN</button>
+              </div>
+              
+               <div class="cont_form_sign_up">
+            <a href="#" onclick="ocultar_login_sign_up()"><i class="material-icons">Return</i></a>
+                 <h2>SIGN UP</h2>
+            <input id = "signupUsername" type="text" placeholder="Username" />
+            <input id = "signupPassword" type="password" placeholder="Password" />
+            <input id = "signupCPassword" type="password" placeholder="Confirm Password" />
+            <button class="btn_sign_up" onclick="signup()">SIGN UP</button>
+            
+              </div>
+            
+                </div>
+                
+              </div>
+             </div>
+          
+            <!-- end of login and sign up demo -->
+             <br>
+             <br>
+            <h2>Or, continue as a guest</h2>
         <input type="text" placeholder="Enter a username..." id="usernameInput">
         <img id="enterWorldIMG" src="img/enterWorld.png">
     </div>
@@ -111,4 +180,5 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/world.js"></script>
     <script src="js/styleShop.js"></script>
+    <script src = "js/loginSignupForm.js"></script>
 </body>

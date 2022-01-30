@@ -31,7 +31,7 @@ body { /*a flex container for the header, main things, footer (3 things)*/
     margin: 0;
 }
 #usernameInput {
-    margin: 60px 0 30px;
+    margin: 10px 0 30px;
     padding:5px 5px 5px;
     text-align: center;
     font-size: 32px;
