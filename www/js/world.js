@@ -35,9 +35,11 @@ let cPassword = document.getElementById("signupCPassword").value;
 
 if (password == cPassword){
     // the password and confirm password fields are equivalent
-    
+    // password should be sent encrypted by sha256 here before it is even sent to the server when signup (vulnerability during sign up here )
+    socket.emit("playerSignup",{username:username,password:password})
 }
 else{
+    console.log("confirm password and password fields are not equivalent, please double check.")
     // the password and confirm password fields are not equivalent
 
 }
